@@ -1,0 +1,14 @@
+{
+  "name": "iris",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "gtest",
+    "nlohmann-json",
+    "spdlog",
+    "giflib",
+    {
+      "name": "opencv",
+      "features": [ "ffmpeg", "contrib" ]
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "description": "sets build and install directory",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/bin/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}",
+        "WINDOWS_PIPELINE": false
+      }
+    },
+    {
+      "name": "linux-local",
+      "displayName": "Linux Local",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": [ "base" ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "VCPKG_ROOT": "/home/cmake-local/vcpkg"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Linux" ] },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": [ "base" ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Linux" ] },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": [ "linux-debug" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "macos-default",
+      "displayName": "macOS Debug",
+      "description": "Target a remote macOS system with Ninja",
+      "inherits": [ "base" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "macOS" ] },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "windows-debug",
+      "displayName": "Windows x64 Debug",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "inherits": [ "base" ],
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Windows" ] } }
+    },
+    {
+      "name": "windows-release",
+      "displayName": "Windows x64 Release",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "inherits": [ "windows-debug" ],
+      "cacheVariables": {
+        "WINDOWS_PIPELINE": true,
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "windows-releaseWithDebInfo",
+      "displayName": "Windows x64 Release",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "inherits": [ "windows-debug" ],
+      "cacheVariables": {
+        "WINDOWS_PIPELINE": true,
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "core-build",
+      "description": "Inherits environment from base configurePreset",
+      "configurePreset": "base",
+      "hidden": true,
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "windows-debug",
+      "description": "Windows debug build",
+      "inherits": "core-build",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release",
+      "description": "Windows release build",
+      "inherits": "core-build",
+      "configurePreset": "windows-release"
+    },
+    {
+      "name": "windows-releaseWithDebInfo",
+      "description": "Windows release with deb info build",
+      "inherits": "core-build",
+      "configurePreset": "windows-releaseWithDebInfo"
+    },
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug",
+      "inherits": "core-build"
+    },
+    {
+      "name": "code-coverage",
+      "configurePreset": "linux-debug",
+      "inherits": "core-build",
+      "targets": "coverage"
+    },
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release",
+      "inherits": "core-build"
+    },
+    {
+      "name": "macos-debug",
+      "description": "MacOS debug build",
+      "inherits": "core-build",
+      "configurePreset": "macos-default"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "videolib-linux",
+      "configurePreset": "linux-release",
+      "environment": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "videolib-windows",
+      "configurePreset": "windows-release",
+      "environment": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+    "name": "cpputils",
+    "version-string": "1.0.0",
+    "description": "Library to share common C++ code",
+    "license": null,
+    "dependencies": [
+      "nlohmann-json",
+      "spdlog",
+      "opencv",
+      {
+        "name": "vcpkg-cmake",
+        "host": true
+      },
+      {
+        "name": "vcpkg-cmake-config",
+        "host": true
+      }
+    ]
+  }
