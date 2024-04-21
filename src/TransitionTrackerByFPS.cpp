@@ -1,26 +1,17 @@
-//Copyright (C) 2023 Electronic Arts, Inc.  All rights reserved.
-
-/*
-#include "TransitionEvaluator.h"
-#include "ConfigurationParams.h"
-#include "FrameData.h"
+#include "TransitionTrackerByFPS.h"
 
 namespace iris
 {
-	TransitionEvaluator::TransitionEvaluator(unsigned int fps, TransitionTrackerParams* params):
-		m_params(params)
+	TransitionTrackerByFPS::TransitionTrackerByFPS(unsigned int fps, TransitionTrackerParams* params)
 	{
+		m_params = params;
 		m_luminanceTransitionCount.count.reserve(fps); m_luminanceTransitionCount.count.emplace_back(0);
 		m_redTransitionCount.count.reserve(fps); m_redTransitionCount.count.emplace_back(0);
 		m_luminanceExtendedCount.count.reserve(m_params->extendedFailWindow * fps); m_luminanceExtendedCount.count.emplace_back(0);
 		m_redExtendedCount.count.reserve(m_params->extendedFailWindow * fps); m_redExtendedCount.count.emplace_back(0);
 	}
-	
-	TransitionEvaluator::~TransitionEvaluator()
-	{
-	}
 
-	void TransitionEvaluator::SetTransitions(bool lumTransition, bool redTransition, FrameData &data)
+	void TransitionTrackerByFPS::SetTransitions(bool lumTransition, bool redTransition, FrameData& data)
 	{
 		data.LuminanceTransitions = m_luminanceTransitionCount.updateCurrent(lumTransition);
 		data.RedTransitions = m_redTransitionCount.updateCurrent(redTransition);
@@ -29,14 +20,7 @@ namespace iris
 		data.RedExtendedFailCount = m_redExtendedCount.updateCurrent(m_redTransitionCount.current <= m_params->maxTransitions && m_redTransitionCount.current >= m_params->minTransitions);
 	}
 
-	/// <summary>
-	/// Checks if in the current frame (moment of the video) the video has 
-	/// failed the flash criteria
-	/// </summary>
-	/// <param name="framePos"> current frame index </param>
-	/// <param name="fps">video frame rate</param>
-	/// <param name="data">data to persist</param>
-	void TransitionEvaluator::EvaluateSecond(int framePos, int fps, FrameData &data)
+	void TransitionTrackerByFPS::EvaluateFrameMoment(int framePos, int fps, FrameData& data)
 	{
 		if (m_luminanceTransitionCount.current > m_params->maxTransitions) //FAIL as max allowed transitions has been surpassed
 		{
@@ -77,13 +61,13 @@ namespace iris
 		}
 
 		//update transition lists as 1s has passed
-		if (framePos >= fps - 1) 
+		if (framePos >= fps - 1)
 		{
 			m_luminanceTransitionCount.updatePassed();
 			m_redTransitionCount.updatePassed();
 
 			// update extended failure as 5s have passed
-			if(framePos >= m_params->extendedFailWindow * fps - 1)
+			if (framePos >= m_params->extendedFailWindow * fps - 1)
 			{
 				m_luminanceExtendedCount.updatePassed();
 				m_redExtendedCount.updatePassed();
@@ -91,4 +75,3 @@ namespace iris
 		}
 	}
 }
-*/

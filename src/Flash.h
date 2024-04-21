@@ -91,7 +91,7 @@ namespace iris
 		/// <param name="value"></param>
 		/// <param name="prec"></param>
 		/// <returns></returns>
-		static float roundoff(float value, char prec);
+		static float roundoff(float value, unsigned char prec);
 
 		/// <summary>
 		/// Calculates sRGB values in the log file to later

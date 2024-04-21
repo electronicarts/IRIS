@@ -65,12 +65,10 @@ namespace iris::Tests
 		return canny;
 	}
 
-
-	static bool CompareFloat(const float& a, const float& b)
+	static bool CompareFloat(const float& a, const float& b, const float& errorMargin = 0.0001f)
 	{
-		return fabs(a - b) < 0.0001f;
+		return fabs(a - b) <= errorMargin;
 	}
-
 
 	class IrisLibTest : public ::testing::Test {
 	protected:

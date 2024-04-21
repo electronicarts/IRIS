@@ -17,14 +17,14 @@ namespace iris
 {
     short Flash::fps = 0;
 
-    Flash::Flash(short videoFPS, const cv::Size& frameSize, FlashParams* flashParams)
+    Flash::Flash(short fps, const cv::Size& frameSize, FlashParams* flashParams)
     {
-        Flash::fps = videoFPS;
+        Flash::fps = fps;
         m_params = flashParams;
         m_avgDiffInSecond.reserve(fps);
         m_avgDiffInSecond.emplace_back(0); //initial frame
         m_frameSize = frameSize.area();
-        m_safeArea = (int)(frameSize.area() * m_params->areaProportion);
+        m_safeArea = frameSize.area() * m_params->areaProportion;
 
         LOG_CORE_INFO("Flash Area in pixels: {0}", m_safeArea);
         LOG_CORE_INFO("Number of pixels in frame: {0}", frameSize.area());
@@ -62,7 +62,7 @@ namespace iris
 
     float Flash::FrameMean()
     {
-        return (float)cv::mean(*currentFrame)[0];
+        return cv::mean(*currentFrame)[0];
     }
 
     void Flash::SetCurrentFrame(cv::Mat* flashValuesFrame)
@@ -132,7 +132,7 @@ namespace iris
         return result;
     }
 
-    float Flash::roundoff(float value, char prec)
+    float Flash::roundoff(float value, unsigned char prec)
     {
         float pow_10 = std::pow(10.0f, (float)prec);
         return std::round(value * pow_10) / pow_10;

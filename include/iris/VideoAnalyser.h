@@ -49,7 +49,7 @@ namespace iris
 		/// <summary>
 		/// Initializes FlashDetection and PatternDetection
 		/// </summary>
-		void Init(const short& fps, const cv::Size& size, const std::string& videoName, bool flagJson = false);
+		void Init(const std::string& videoName, bool flagJson = false);
 
 		/// <summary>
 		/// Release FlashDetection and PatternDection
@@ -59,7 +59,7 @@ namespace iris
 		/// <summary>
 		/// Checks if the video file can be opened and read
 		/// </summary>
-		bool VideoIsOpen(cv::VideoCapture& video, const char* videoName);
+		bool VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video, const char* videoName);
 
 		/// <summary>
 		/// Anlyses video to check photosensitivity
@@ -71,16 +71,39 @@ namespace iris
 		/// <summary>
 		/// Frame analysis for checking for photosensitivity for tracked issues (flashes/patterns)
 		/// </summary>
-		void AnalyseFrame(cv::Mat& frame, int& frameIndex, FrameData& data);
+		void AnalyseFrame(cv::Mat& frame, unsigned int& frameIndex, FrameData& data);
 
+		/// <summary>
+		/// Set optimal number of threads depending on the frame resolution
+		/// </summary>
+		void SetOptimalCvThreads(cv::Size size);
+
+		
+		struct VideoInfo
+		{
+			int fps; //video frames per second
+			int frameCount; //number of frames in video
+			float duration; //duration in seconds
+			cv::Size frameSize; //video resolution
+		};
+
+		inline VideoInfo GetVideoInfo() { return m_videoInfo; }
+		
 	private:
+
+		/// <summary>
+		/// Obtains the avg_frame_rate of the video
+		/// </summary>
+		/// <param name="sourceVideo">Video file path</param>
+		/// <returns>frames per second in video</returns>
+		int GetVideoFps(const char* sourceVideo);
 
 		void SerializeResults(const Result& result, const FrameDataJson& lineGraphData, const FrameDataJson& nonPassData);
 
 		/// <summary>
 		/// Updates the current analysis progress
 		/// </summary>
-		void UpdateProgress(int& numFrames, const long& totalFrames, int& lastPercentage);
+		void UpdateProgress(unsigned int& numFrames, const unsigned long& totalFrames, unsigned int& lastPercentage);
 
 		Configuration* m_configuration = nullptr;
 		FlashDetection* m_flashDetection = nullptr;
@@ -91,5 +114,7 @@ namespace iris
 
 		std::string m_resultJsonPath;
 		std::string m_frameDataJsonPath;
+
+		VideoInfo m_videoInfo;
 	};
 }

@@ -26,7 +26,7 @@ namespace iris
 	public:
 
 		FrameData() {};
-		FrameData(int frame, long timeMs) : Frame(frame)
+		FrameData(unsigned int frame, unsigned long timeMs) : Frame(frame)
 		{
 			TimeStampMs = msToTimeSpan(timeMs);
 		};
@@ -108,7 +108,7 @@ namespace iris
 		/// <summary>
 		/// Frame index
 		/// </summary>
-		int Frame = 0;
+		unsigned int Frame = 0;
 
 		/// <summary>
 		/// frame timestamp in milliseconds
@@ -123,10 +123,10 @@ namespace iris
 		float AverageRedDiff = 0;
 		float AverageRedDiffAcc = 0;
 		float PatternRisk = 0;
-		int LuminanceTransitions = 0;
-		int RedTransitions = 0;
-		int LuminanceExtendedFailCount = 0;
-		int RedExtendedFailCount = 0;
+		unsigned int LuminanceTransitions = 0;
+		unsigned int RedTransitions = 0;
+		unsigned int LuminanceExtendedFailCount = 0;
+		unsigned int RedExtendedFailCount = 0;
 		FlashResult luminanceFrameResult = FlashResult::Pass;
 		FlashResult redFrameResult = FlashResult::Pass;
 		std::string  patternArea = "0.00%";
@@ -161,7 +161,7 @@ namespace iris
 
 	struct FrameDataJson
 	{
-		void reserve(const int& size) 
+		void reserve(const unsigned int& size) 
 		{
 			frame.reserve(size);
 			timeStampMs.reserve(size);
@@ -190,7 +190,7 @@ namespace iris
 
 		}
 
-		void reserveLineGraphData(const int& size)
+		void reserveLineGraphData(const unsigned int& size)
 		{
 			timeStampMs.reserve(size);
 			luminanceTransitions.reserve(size);
@@ -238,25 +238,25 @@ namespace iris
 			patternFrameResult.push_back((int)data.patternFrameResult);
 		}
 
-		std::vector<int> frame;
+		std::vector<unsigned int> frame;
 		std::vector<std::string> timeStampMs;
 		std::vector<std::string> luminanceFlashArea;
 		std::vector<float> luminanceAverage;
 		std::vector<float> averageLuminanceDiff;
 		std::vector<float> averageLuminanceDiffAcc;
-		std::vector <std::string> redFlashArea;
+		std::vector < std::string> redFlashArea;
 		std::vector<float> redAverage;
 		std::vector<float> averageRedDiff;
 		std::vector<float> averageRedDiffAcc;
-		std::vector<int> luminanceTransitions;
-		std::vector<int> redTransitions;
-		std::vector<int> luminanceExtendedFailCount;
-		std::vector<int> redExtendedFailCount;
-		std::vector<short> luminanceFrameResult;
-		std::vector<short> redFrameResult;
+		std::vector<unsigned int> luminanceTransitions;
+		std::vector<unsigned int> redTransitions;
+		std::vector<unsigned int> luminanceExtendedFailCount;
+		std::vector<unsigned int> redExtendedFailCount;
+		std::vector<unsigned short> luminanceFrameResult;
+		std::vector<unsigned short> redFrameResult;
 		std::vector<std::string> patternArea;
 		std::vector<int> patternDetectedLines;
-		std::vector<short> patternFrameResult;
+		std::vector<unsigned short> patternFrameResult;
 	};
 
 	//Serializes FrameData to Json object

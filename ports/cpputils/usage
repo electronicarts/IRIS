@@ -1,4 +1,0 @@
-The package CppUtils provides CMake targets
-
-    find_package(cpputils CONFIG REQUIRED)
-    target_link_libraries(main PRIVATE cpputils::cpputils)

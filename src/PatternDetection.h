@@ -56,7 +56,7 @@ private:
 
 	void checkFrameCount(FrameData& data);
 	//detects a pattern in a video frame and returns the pattern info
-	Pattern detectPattern(const IrisFrame& irisFrame);
+	Pattern detectPattern(const IrisFrame& irisFrame, const int& framePos);
 
 	//determines whether a video frame has a pattern or not
 	bool hasPattern(const cv::Mat& luminanceFrame, cv::Mat& ift);
@@ -119,8 +119,8 @@ private:
 		}
 
 		std::vector<int> count;
-		int passed = 0;
-		int current = 0;
+		int passed;
+		int current;
 	};
 
 	PatternDetectionParams* m_params;
@@ -129,14 +129,14 @@ private:
 	Counter m_patternFrameCount;
 
 	int m_frameTimeThresh;
-	int m_patternFailFrames;
+	unsigned int m_patternFailFrames;
 
 	short m_fps;
 	int m_safeArea;
 	int m_frameSize;
 	int m_thresholdArea; //20% of the frame size to check if there is a possible pattern
+	int m_diffThreshold; //number of pixels that must have changed to continue the pattern detection flow
 	bool m_isFail;
-	int areaThresh;
 	int m_contourThreshArea;
 
 	cv::Mat m_dilationElement;

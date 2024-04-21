@@ -45,15 +45,15 @@ namespace iris
 
 	struct Result
 	{
-		int VideoLen = 0;
-        int AnalysisTime = 0;
-        int TotalFrame = 0;
-        int patternFailFrames = 0;
+		float VideoLen = 0;
+        unsigned int AnalysisTime = 0;
+        unsigned int TotalFrame = 0;
         AnalysisResult OverallResult = AnalysisResult::Pass;
         std::vector<AnalysisResult> Results;
         //total amount of frames that were counted that belonged to each incident type
         TotalFlashIncidents totalLuminanceIncidents;
         TotalFlashIncidents totalRedIncidents;
+        unsigned int patternFailFrames = 0;
 	};
 
 

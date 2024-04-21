@@ -15,8 +15,8 @@ namespace iris
 {
     cv::Scalar RelativeLuminance::rgbValues(0.0722f, 0.7152f, 0.2126f);
 
-    RelativeLuminance::RelativeLuminance(short videoFPS, const cv::Size& frameSize, FlashParams* params)
-        : Flash(videoFPS, frameSize, params)
+    RelativeLuminance::RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params)
+        : Flash(fps, frameSize, params)
     {
     }
 

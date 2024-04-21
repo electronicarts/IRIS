@@ -1,7 +1,7 @@
 //Copyright (C) 2023 Electronic Arts, Inc.  All rights reserved.
 
 #include "IrisLibTest.h"
-#include "VideoAnalyser.cpp"
+#include "iris/VideoAnalyser.h"
 #include <opencv2/videoio.hpp>
 #include <fstream>
 #include <string>
@@ -24,14 +24,15 @@ namespace iris::Tests
 			std::string line;
 			std::getline(logFile, line); //discard first line
 			std::string testVideo = "testVideo";
-			videoAnalyser.Init(video.get(cv::CAP_PROP_FPS), cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT)), testVideo);
+			videoAnalyser.Init(testVideo);
 			cv::Mat frame;
 			video.read(frame);
-			int numFrames = 0;
+			unsigned int numFrames = 0;
 
 			while (!frame.empty())
 			{
-				FrameData data(numFrames + 1, video.get(cv::CAP_PROP_FRAME_COUNT));
+				FrameData data(numFrames + 1, 1000.0 * (double)numFrames / video.get(cv::CAP_PROP_FPS));
+				//FrameData data(numFrames + 1, video.get(cv::CAP_PROP_FRAME_COUNT));
 				videoAnalyser.AnalyseFrame(frame, numFrames, data);
 
 				video.read(frame); //obtain new frame
@@ -90,7 +91,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 		
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/2Hz_5s_RELATIVE.csv");
 		}
@@ -102,7 +103,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/2Hz_6s_RELATIVE.csv");
 		}
@@ -114,7 +115,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/3Hz_6s_RELATIVE.csv");
 		}
@@ -126,7 +127,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/extendedFLONG_RELATIVE.csv");
 		}
@@ -138,7 +139,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/GradualRedIncrease_RELATIVE.csv");
 		}
@@ -150,7 +151,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/gray_RELATIVE.csv");
 		}
@@ -162,7 +163,7 @@ namespace iris::Tests
 		VideoAnalyser videoAnalyser(&configuration);
 
 		cv::VideoCapture video(sourceVideo);
-		if (videoAnalyser.VideoIsOpen(video, nullptr))
+		if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 		{
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/intermitentEF_RELATIVE.csv");
 		}
@@ -174,7 +175,7 @@ namespace iris::Tests
 	//	VideoAnalyser videoAnalyser(&configuration);
 
 	//	cv::VideoCapture video(sourceVideo);
-	//	if (videoAnalyser.VideoIsOpen(video, nullptr))
+	//	if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 	//	{
 	//		TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/Pattern - Circular 4_RELATIVE.csv");
 	//	}
@@ -186,7 +187,7 @@ namespace iris::Tests
 	//	VideoAnalyser videoAnalyser(&configuration);
 
 	//	cv::VideoCapture video(sourceVideo);
-	//	if (videoAnalyser.VideoIsOpen(video, nullptr))
+	//	if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
 	//	{
 	//		TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/Pattern - Circular 5_RELATIVE.csv");
 	//	}

@@ -116,6 +116,18 @@ int main(int argc, char* argv[])
 			configuration.SetPatternDetectionStatus(false);
 		}
 	}
+	if (cmdOptionExists(argv, argv + argc, "-r"))
+	{
+		std::string resize = getCmdOption(argv, argv + argc, "-r");
+		if (resize == "true" || resize == "1")
+		{
+			configuration.SetFrameResizeEnabled(true);
+		}
+		else if (resize == "false" || resize == "0")
+		{
+			configuration.SetFrameResizeEnabled(false);
+		}
+	}
 
 	if (cmdOptionExists(argv, argv + argc, "-a"))
 	{
@@ -125,7 +137,6 @@ int main(int argc, char* argv[])
 
 	//Run video analysis
 	CreateResultsDir(configuration);
-
 
 	if (sourceVideo != nullptr) //Run specific video
 	{

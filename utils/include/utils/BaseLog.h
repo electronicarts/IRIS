@@ -40,9 +40,9 @@ namespace EA::EACC::Utils
 			RotatingFileSinkParams(const char* fileName) : fileName(fileName){}
 
 			const char* fileName = nullptr;
+			std::size_t max_size = 1024 * 1024;
 			std::size_t max_files = 5;
 			bool rotate_on_open = true;
-			std::size_t max_size = 1024 * 1024;
 		};
 	protected:
 

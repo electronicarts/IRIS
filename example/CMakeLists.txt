@@ -20,12 +20,18 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 # Copy needed dll files into executable when building iris as dll
 if(BUILD_SHARED_LIBS)    
     message("Copy dynamic libraries into IrisApp directory")
-    file(GLOB_RECURSE DLL_FILES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll)
-    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    set(IRIS_DLL iris.dll)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Debug") # set DEBUG_POSTFIX
         set(IRIS_DLL irisd.dll)
+        set(UTILS_DLL utilsd.dll)
+        file(GLOB_RECURSE DLL_DEBUG_FILES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/bin/*.dll)
+        file(COPY ${DLL_DEBUG_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+        
+    else()
+        file(GLOB_RECURSE DLL_FILES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/*.dll)
+        file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+        set(IRIS_DLL iris.dll)
+        set(UTILS_DLL utils.dll)
     endif()
 
     add_custom_command(TARGET ${PROJECT_NAME} 
@@ -33,6 +39,12 @@ if(BUILD_SHARED_LIBS)
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/${IRIS_DLL}
         ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Copying Iris DLL to build directory"                    
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/utils/${UTILS_DLL}
+        ${CMAKE_CURRENT_BINARY_DIR}
+
+    COMMENT "Copying Iris and utils DLL to build directory"
     )
+    
+    
 endif()
