@@ -1,5 +1,5 @@
 //Copyright (C) 2023 Electronic Arts, Inc.  All rights reserved.
-
+/*
 #include "IrisLibTest.h"
 #include <gtest/gtest.h>
 #include "TransitionEvaluator.h"
@@ -16,7 +16,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		transitionEvaluator.SetTransitions(true, false, testData);
 		transitionEvaluator.SetTransitions(true, false, testData);
@@ -34,7 +34,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		transitionEvaluator.SetTransitions(false, false, testData);
 		transitionEvaluator.SetTransitions(false, true, testData);
@@ -52,7 +52,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		transitionEvaluator.SetTransitions(false, false, testData);
 		transitionEvaluator.SetTransitions(true, true, testData);
@@ -70,7 +70,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 8; i++)
 		{
@@ -87,7 +87,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 8; i++)
 		{
@@ -105,7 +105,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(10, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(10, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 2; i++) //add 2 luminance and red transitions
 		{
@@ -135,7 +135,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 3; i++) //add 3 luminance transitions
 		{
@@ -156,7 +156,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 3; i++) //add 3 red transitions
 		{
@@ -177,7 +177,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(8, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 3; i++) //add 3 luminance and red transitions
 		{
@@ -198,7 +198,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData;
-		TransitionEvaluator transitionEvaluator(5, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(5, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 23; i++) //add luminance and red transitions
 		{
@@ -223,7 +223,7 @@ namespace iris::Tests
 	{
 		//Only luminance transitions
 		FrameData testData = FrameData();
-		TransitionEvaluator transitionEvaluator(4, configuration.GetTransitionEvaluatorParams());
+		TransitionEvaluator transitionEvaluator(4, configuration.GetTransitionTrackerParams());
 
 		for (int i = 0; i < 5; i++) //add 5 luminance and red transitions
 		{
@@ -245,4 +245,4 @@ namespace iris::Tests
 		EXPECT_EQ(9, testData.LuminanceTransitions);
 		EXPECT_EQ(11, testData.RedTransitions);
 	}
-}
+}*/

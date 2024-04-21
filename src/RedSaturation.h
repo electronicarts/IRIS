@@ -18,7 +18,7 @@ namespace iris
 	{
 	public:
 
-		RedSaturation(short videoFPS, const cv::Size& frameSize, FlashParams* params);
+		RedSaturation(short fps, const cv::Size& frameSize, FlashParams* params);
 		~RedSaturation();
 
 		void SetCurrentFrame(cv::Mat* sRgbFrame) override;

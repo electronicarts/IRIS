@@ -13,10 +13,11 @@ set(SOURCE_FILES
    "src/RedSaturationTests.cpp"
    "src/RelativeLuminanceTest.cpp"
    "src/CDLuminanceTest.cpp"
-   "src/TransitionEvaluatorTest.cpp"
    "src/FlashDetectionTests.cpp"
    "src/PatternDetectionTests.cpp" 
    "src/VideoAnalysisTests.cpp"
+   "src/TransitionTrackerByFPSTests.cpp"
+   "src/TransitionTrackerByTimeTests.cpp"
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

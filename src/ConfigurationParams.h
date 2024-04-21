@@ -6,6 +6,8 @@
 
 namespace iris
 {
+	using uint = unsigned int;
+
 	struct FlashParams
 	{
 		FlashParams(float flashThresh, float areaP, float darkThresh) : flashThreshold(flashThresh), areaProportion(areaP), darkThreshold(darkThresh) {};
@@ -23,15 +25,16 @@ namespace iris
 		std::vector<float> sRgbValues; //The input array containing the decimal values for the sRgb convertion
 	};
 
-	struct TransitionEvaluatorParams
+	struct TransitionTrackerParams
 	{
-		TransitionEvaluatorParams(int maxTransition, int minTransitions, int extendedFailSeconds, int extendedFailWindow)
-		: maxTransitions(maxTransition), minTransitions(minTransitions), extendedFailSeconds(extendedFailSeconds), extendedFailWindow (extendedFailWindow) {};
+		TransitionTrackerParams(uint maxTransition, uint minTransitions, uint extendedFailSeconds, uint extendedFailWindow, bool analyseByTime)
+		: maxTransitions(maxTransition), minTransitions(minTransitions), extendedFailSeconds(extendedFailSeconds), extendedFailWindow (extendedFailWindow), analyseByTime(analyseByTime) {};
 
-		int maxTransitions; //max allowed transitions and max transitions to count for extended fail
-		int minTransitions; //amount of min transitions to add to extended fail count
-		int extendedFailSeconds; //if extendedFailFramesIS reach this value, extended failure has occured
-		int extendedFailWindow; //seconds in extended fail count window
+		uint maxTransitions; //max allowed transitions and max transitions to count for extended fail
+		uint minTransitions; //amount of min transitions to add to extended fail count
+		uint extendedFailSeconds; //if extendedFailFramesIS reach this value, extended failure has occured
+		uint extendedFailWindow; //seconds in extended fail count window
+		bool analyseByTime; //realise the flash analysis by time instead of FPS
 	};
 
 	struct PatternDetectionParams

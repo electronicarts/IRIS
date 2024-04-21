@@ -11,13 +11,23 @@
 #include "IrisFrame.h"
 #include "iris/Log.h"
 #include "iris/Result.h"
+#include "TransitionTrackerByFPS.h"
+#include "TransitionTrackerByTime.h"
 
 namespace iris
 {
 	FlashDetection::FlashDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize)
-		: m_transitionEvaluator(fps, configuration->GetTransitionEvaluatorParams()), m_sRgbConverter(configuration->GetFrameSrgbConverterParams()), m_fps(fps)
+		: m_sRgbConverter(configuration->GetFrameSrgbConverterParams()), m_fps(fps)
 
 	{
+
+		if (configuration->GetTransitionTrackerParams()->analyseByTime) {
+			m_transitionTracker = new TransitionTrackerByTime(fps, configuration->GetTransitionTrackerParams());
+		}
+		else {
+			m_transitionTracker = new TransitionTrackerByFPS(fps, configuration->GetTransitionTrackerParams());
+		}
+		
 		if (configuration->GetLuminanceType() == Configuration::LuminanceType::RELATIVE)
 		{
 			m_luminance = new RelativeLuminance(fps, frameSize, configuration->GetLuminanceFlashParams());
@@ -46,6 +56,10 @@ namespace iris
 		{
 			delete m_cdLuminanceConverter; m_cdLuminanceConverter = nullptr;
 		}
+		if (m_transitionTracker != nullptr)
+		{
+			delete m_transitionTracker;
+		}
 	}
 
 	void FlashDetection::setLuminance(IrisFrame& irisFrame)
@@ -64,15 +78,19 @@ namespace iris
 
 		if (framePos != 0) //check difference between frame(n) and frame (n - 1)
 		{
-			frameDifference(data);
-			m_transitionEvaluator.EvaluateSecond(framePos, m_fps, data);
+			frameDifference(framePos, data);
+			m_transitionTracker->EvaluateFrameMoment(framePos, m_fps, data);
+		}
+		else 
+		{
+			m_transitionTracker->SetFirstFrame(data);
 		}
 
 		data.AverageLuminanceDiffAcc = m_lastAvgLumDiffAcc;
 		data.AverageRedDiffAcc = m_lastAvgRedDiffAcc;
 	}
 
-	void FlashDetection::frameDifference(FrameData& data)
+	void FlashDetection::frameDifference(const int& framePos, FrameData& data)
 	{
 		//Red Saturation difference 
 		cv::Mat* redSaturationDiff = m_redSaturation->FrameDifference();
@@ -90,7 +108,7 @@ namespace iris
 		m_lastAvgLumDiffAcc = luminanceTransition.lastAvgDiffAcc;
 
 		//Evaluate and count new transitions
-		m_transitionEvaluator.SetTransitions(luminanceTransition.checkResult, redTranstion.checkResult, data);
+		m_transitionTracker->SetTransitions(luminanceTransition.checkResult, redTranstion.checkResult, data);
 
 		data.LuminanceFlashArea = data.proportionToPercentage(m_luminance->GetFlashArea());
 		data.RedFlashArea = data.proportionToPercentage(m_redSaturation->GetFlashArea());
@@ -104,17 +122,17 @@ namespace iris
 	
 	bool FlashDetection::isFail()
 	{
-		if (m_transitionEvaluator.getFlashFail())
+		if (m_transitionTracker->getFlashFail())
 		{
 			LOG_CORE_INFO("Flash FAIL");
 		}
 
-		if (m_transitionEvaluator.getExtendedFailure())
+		if (m_transitionTracker->getExtendedFailure())
 		{
 			LOG_CORE_INFO("Extended Failure");
 		}
 
-		return m_transitionEvaluator.getFlashFail() || m_transitionEvaluator.getExtendedFailure();
+		return m_transitionTracker->getFlashFail() || m_transitionTracker->getExtendedFailure();
 	}
 
 	cv::Mat* FlashDetection::getLuminanceFrame()
@@ -125,11 +143,11 @@ namespace iris
 	void FlashDetection::setResult(Result& result)
 	{
 		//set incident counters
-		result.totalLuminanceIncidents = m_transitionEvaluator.getLuminanceIncidents();
-		result.totalRedIncidents = m_transitionEvaluator.getRedIncidents();
+		result.totalLuminanceIncidents = m_transitionTracker->getLuminanceIncidents();
+		result.totalRedIncidents = m_transitionTracker->getRedIncidents();
 
 		//set overall result and results vector
-		if (m_transitionEvaluator.getLumFlashFail())
+		if (m_transitionTracker->getLumFlashFail())
 		{
 			result.OverallResult = AnalysisResult::Fail;
 			result.Results.emplace_back(AnalysisResult::LuminanceFlashFailure);
@@ -137,14 +155,14 @@ namespace iris
 			LOG_CORE_INFO("Luminance Flash FAIL");
 		}
 
-		if (m_transitionEvaluator.getLumExtendedFailure())
+		if (m_transitionTracker->getLumExtendedFailure())
 		{
 			result.OverallResult = AnalysisResult::Fail;
 			result.Results.emplace_back(AnalysisResult::LuminanceExtendedFlashFailure);
 			LOG_CORE_INFO("Luminance Extended Failure");
 		}
 
-		if (m_transitionEvaluator.getRedFlashFail())
+		if (m_transitionTracker->getRedFlashFail())
 		{
 			result.OverallResult = AnalysisResult::Fail;
 			result.Results.emplace_back(AnalysisResult::RedFlashFailure);
@@ -152,14 +170,14 @@ namespace iris
 			LOG_CORE_INFO("Red Flash FAIL");
 		}
 
-		if (m_transitionEvaluator.getRedExtendedFailure())
+		if (m_transitionTracker->getRedExtendedFailure())
 		{
 			result.OverallResult = AnalysisResult::Fail;
 			result.Results.emplace_back(AnalysisResult::RedExtendedFlashFailure);
 			LOG_CORE_INFO("Red Extended Failure");
 		}
 
-		if (result.OverallResult != AnalysisResult::Fail && ( m_transitionEvaluator.getLumPassWithWarning() || m_transitionEvaluator.getRedPassWithWarning() ))
+		if (result.OverallResult != AnalysisResult::Fail && ( m_transitionTracker->getLumPassWithWarning() || m_transitionTracker->getRedPassWithWarning() ))
 		{
 			result.OverallResult = AnalysisResult::PassWithWarning;
 			LOG_CORE_INFO("Pass with Warning");

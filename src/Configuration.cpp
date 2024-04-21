@@ -34,9 +34,9 @@ namespace iris
 			delete m_frameCDLuminanceConverterParams;  m_frameCDLuminanceConverterParams = nullptr;
 		}
 
-		if (m_transitionEvaluatorParams != nullptr)
+		if (m_transitionTrackerParams != nullptr)
 		{
-			delete m_transitionEvaluatorParams; m_transitionEvaluatorParams = nullptr;
+			delete m_transitionTrackerParams; m_transitionTrackerParams = nullptr;
 		}
 
 		if (m_patternDetectionParams != nullptr)
@@ -60,6 +60,9 @@ namespace iris
 		}
 
 		m_patternDetectionEnabled = jsonFile.GetParam<bool>("VideoAnalyser", "PatternDetectionEnabled");
+		m_frameResizeEnabled = jsonFile.GetParam<bool>("VideoAnalyser", "FrameResizeEnabled");
+
+		m_frameResizeProportion = jsonFile.GetParam<float>("VideoAnalyser", "ResizeFrameProportion");
 		
 		//Luminance
 		if (m_luminanceType == LuminanceType::CD)
@@ -94,12 +97,13 @@ namespace iris
 				jsonFile.GetVector<float>("Luminance", "CdLuminanceValues"));
 		}
 
-		//Transition Evaluetor Params
-		m_transitionEvaluatorParams = new TransitionEvaluatorParams(
-			jsonFile.GetParam<int>("TransitionEvaluator", "MaxTransitions"), 
-			jsonFile.GetParam<int>("TransitionEvaluator", "MinTransitions"),
-			jsonFile.GetParam<int>("TransitionEvaluator", "ExtendedFailSeconds"), 
-			jsonFile.GetParam<int>("TransitionEvaluator", "ExtendedFailWindow"));
+		//Transition Tracker Params
+		m_transitionTrackerParams = new TransitionTrackerParams(
+			jsonFile.GetParam<uint>("TransitionTracker", "MaxTransitions"), 
+			jsonFile.GetParam<uint>("TransitionTracker", "MinTransitions"),
+			jsonFile.GetParam<uint>("TransitionTracker", "ExtendedFailSeconds"), 
+			jsonFile.GetParam<uint>("TransitionTracker", "ExtendedFailWindow"),
+			jsonFile.GetParam<bool>("TransitionTracker", "AnalyseByTime"));
 
 		//Pattern Detection
 		int minStripes = jsonFile.GetParam<int>("PatternDetection", "MinStripes");

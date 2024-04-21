@@ -1,5 +1,6 @@
 //Copyright (C) 2023 Electronic Arts, Inc.  All rights reserved.
 
+/*
 #pragma once
 #include <vector>
 #include "iris/TotalFlashIncidents.h"
@@ -7,14 +8,14 @@
 namespace iris
 {
 
-struct TransitionEvaluatorParams;
+struct TransitionTrackerParams;
 class FrameData;
 
 class TransitionEvaluator
 {
 
 public:
-	TransitionEvaluator(int fps, TransitionEvaluatorParams* params);
+	TransitionEvaluator(unsigned int fps, TransitionTrackerParams* params);
 	~TransitionEvaluator();
 	
 	inline bool getLumPassWithWarning() { return m_luminanceResults.passWithWarning; };
@@ -105,7 +106,8 @@ private:
 	TotalFlashIncidents m_luminanceIncidents;
 	TotalFlashIncidents m_redIncidents;
 
-	TransitionEvaluatorParams* m_params = nullptr;
+	TransitionTrackerParams* m_params = nullptr;
 };
 
 }
+*/

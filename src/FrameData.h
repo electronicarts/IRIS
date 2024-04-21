@@ -10,9 +10,9 @@ namespace iris
 {
 	static std::string msToTimeSpan(int ms)
 	{
-		float seconds = fmodf((ms / 1000.0f), 60);
-		int minutes = (int)floor((ms / (1000 * 60)) % 60);
-		int hours = (int)floor((ms / (1000 * 60 * 60)) % 24);
+		float seconds = fmodf((ms / 1000.0), 60);
+		int minutes = floor((ms / (1000 * 60)) % 60);
+		int hours = floor((ms / (1000 * 60 * 60)) % 24);
 
 		std::string h = (hours < 10) ? "0" + std::to_string(hours) : std::to_string(hours);
 		std::string m = (minutes < 10) ? "0" + std::to_string(minutes) : std::to_string(minutes);
@@ -26,8 +26,9 @@ namespace iris
 	public:
 
 		FrameData() {};
-		FrameData(int frame, long timeMs) : Frame(frame)
+		FrameData(unsigned int frame, unsigned long timeMs) : Frame(frame)
 		{
+			TimeStampVal = timeMs;
 			TimeStampMs = msToTimeSpan(timeMs);
 		};
 
@@ -54,11 +55,11 @@ namespace iris
 				+ ',' + std::to_string(RedTransitions) 
 				+ ',' + std::to_string(LuminanceExtendedFailCount)
 				+ ',' + std::to_string(RedExtendedFailCount)
-				+ ',' + std::to_string((short)luminanceFrameResult)
-				+ ',' + std::to_string((short)redFrameResult)
+				+ ',' + std::to_string((int)luminanceFrameResult)
+				+ ',' + std::to_string((int)redFrameResult)
 				+ ',' + patternArea
 				+ ',' + std::to_string(patternDetectedLines)
-				+ ',' + std::to_string((short)patternFrameResult) + '\0';
+				+ ',' + std::to_string((int)patternFrameResult) + '\0';
 			return csvOutput;
 		}
 
@@ -108,7 +109,7 @@ namespace iris
 		/// <summary>
 		/// Frame index
 		/// </summary>
-		int Frame = 0;
+		unsigned int Frame = 0;
 
 		/// <summary>
 		/// frame timestamp in milliseconds
@@ -123,15 +124,16 @@ namespace iris
 		float AverageRedDiff = 0;
 		float AverageRedDiffAcc = 0;
 		float PatternRisk = 0;
-		int LuminanceTransitions = 0;
-		int RedTransitions = 0;
-		int LuminanceExtendedFailCount = 0;
-		int RedExtendedFailCount = 0;
+		unsigned int LuminanceTransitions = 0;
+		unsigned int RedTransitions = 0;
+		unsigned int LuminanceExtendedFailCount = 0;
+		unsigned int RedExtendedFailCount = 0;
 		FlashResult luminanceFrameResult = FlashResult::Pass;
 		FlashResult redFrameResult = FlashResult::Pass;
 		std::string  patternArea = "0.00%";
 		int patternDetectedLines = 0;
 		PatternResult patternFrameResult = PatternResult::Pass;
+		unsigned long TimeStampVal = 0;
 	};
 
 	//Serializes FrameData to Json object
@@ -161,7 +163,7 @@ namespace iris
 
 	struct FrameDataJson
 	{
-		void reserve(const int& size) 
+		void reserve(const unsigned int& size) 
 		{
 			frame.reserve(size);
 			timeStampMs.reserve(size);
@@ -190,7 +192,7 @@ namespace iris
 
 		}
 
-		void reserveLineGraphData(const int& size)
+		void reserveLineGraphData(const unsigned int& size)
 		{
 			timeStampMs.reserve(size);
 			luminanceTransitions.reserve(size);
@@ -220,12 +222,12 @@ namespace iris
 
 			luminanceExtendedFailCount.push_back(data.LuminanceExtendedFailCount);
 			redExtendedFailCount.push_back(data.RedExtendedFailCount);
-			luminanceFrameResult.push_back((short)data.luminanceFrameResult);
-			redFrameResult.push_back((short)data.redFrameResult);
+			luminanceFrameResult.push_back((int)data.luminanceFrameResult);
+			redFrameResult.push_back((int)data.redFrameResult);
 
 			patternArea.push_back(data.patternArea);
 			patternDetectedLines.push_back(data.patternDetectedLines);
-			patternFrameResult.push_back((short)data.patternFrameResult);
+			patternFrameResult.push_back((int)data.patternFrameResult);
 		}
 
 		void push_back_lineGraphData(const FrameData& data)
@@ -233,12 +235,12 @@ namespace iris
 			timeStampMs.push_back(data.TimeStampMs);
 			luminanceTransitions.push_back(data.LuminanceTransitions);
 			redTransitions.push_back(data.RedTransitions);
-			luminanceFrameResult.push_back((short)data.luminanceFrameResult);
-			redFrameResult.push_back((short)data.redFrameResult);
-			patternFrameResult.push_back((short)data.patternFrameResult);
+			luminanceFrameResult.push_back((int)data.luminanceFrameResult);
+			redFrameResult.push_back((int)data.redFrameResult);
+			patternFrameResult.push_back((int)data.patternFrameResult);
 		}
 
-		std::vector<int> frame;
+		std::vector<unsigned int> frame;
 		std::vector<std::string> timeStampMs;
 		std::vector<std::string> luminanceFlashArea;
 		std::vector<float> luminanceAverage;
@@ -248,15 +250,15 @@ namespace iris
 		std::vector<float> redAverage;
 		std::vector<float> averageRedDiff;
 		std::vector<float> averageRedDiffAcc;
-		std::vector<int> luminanceTransitions;
-		std::vector<int> redTransitions;
-		std::vector<int> luminanceExtendedFailCount;
-		std::vector<int> redExtendedFailCount;
-		std::vector<short> luminanceFrameResult;
-		std::vector<short> redFrameResult;
+		std::vector<unsigned int> luminanceTransitions;
+		std::vector<unsigned int> redTransitions;
+		std::vector<unsigned int> luminanceExtendedFailCount;
+		std::vector<unsigned int> redExtendedFailCount;
+		std::vector<unsigned short> luminanceFrameResult;
+		std::vector<unsigned short> redFrameResult;
 		std::vector<std::string> patternArea;
 		std::vector<int> patternDetectedLines;
-		std::vector<short> patternFrameResult;
+		std::vector<unsigned short> patternFrameResult;
 	};
 
 	//Serializes FrameData to Json object

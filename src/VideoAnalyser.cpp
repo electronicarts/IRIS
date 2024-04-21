@@ -17,6 +17,13 @@
 #include "iris/Result.h"
 #include <string>
 #include "utils/JsonWrapper.h"
+#include <opencv2/imgproc.hpp>
+
+extern "C" {
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+}
+
 
 namespace iris
 {
@@ -35,12 +42,20 @@ namespace iris
 	{
 	}
 
-	void VideoAnalyser::Init(const short& fps, const cv::Size& size, const std::string& videoName, bool flagJson)
+	void VideoAnalyser::Init(const std::string& videoName, bool flagJson)
 	{
-		m_flashDetection = new FlashDetection(m_configuration, fps, size);
+		if (m_configuration->FrameResizeEnabled())
+		{
+			float resizedFrameProportion;
+			resizedFrameProportion = m_configuration->GetFrameResizeProportion();
+			LOG_CORE_INFO("Resizing frames at: {0}%", resizedFrameProportion * 100);
+			m_videoInfo.frameSize = cv::Size(m_videoInfo.frameSize.width * resizedFrameProportion, m_videoInfo.frameSize.height * resizedFrameProportion);
+		}
+
+		m_flashDetection = new FlashDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize);
 		m_photosensitivityDetector.push_back(m_flashDetection);
 		m_frameSrgbConverter = new EA::EACC::Utils::FrameConverter(m_configuration->GetFrameSrgbConverterParams());
-		m_patternDetection = new PatternDetection(m_configuration, fps, size);
+		m_patternDetection = new PatternDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize);
 
 		if (m_configuration->PatternDetectionEnabled())
 		{
@@ -56,12 +71,12 @@ namespace iris
 			m_frameDataJsonPath = m_configuration->GetResultsPath() + videoName + "/" + "frameData" + ".json";
 		}
 
-		LOG_CORE_INFO("Video analysis FPS: {}", fps);
-
 		const char* luminanceType = m_configuration->GetLuminanceType() == Configuration::LuminanceType::CD ? "CD" : "RELATIVE";
 		LOG_CORE_INFO("Luminance Type: {0}", luminanceType);
 		
 		LOG_CORE_INFO("Pattern Detection: {0}", m_configuration->PatternDetectionEnabled());
+
+		LOG_CORE_INFO("Frame Resize: {0}", m_configuration->FrameResizeEnabled());
 		
 		LOG_CORE_INFO("Safe Area Proportion: {0}", m_configuration->GetSafeAreaProportion());
 
@@ -91,14 +106,15 @@ namespace iris
 		cv::VideoCapture video(sourceVideo);
 		std::string videoName = std::filesystem::path(sourceVideo).filename().string();
 
-		if (VideoIsOpen(video, videoName.c_str()))
+		if (VideoIsOpen(sourceVideo, video, videoName.c_str()))
 		{
-			Init((short)round(video.get(cv::CAP_PROP_FPS)), cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT)), videoName, flagJson);
+			Init(videoName, flagJson);
+			SetOptimalCvThreads(m_videoInfo.frameSize);
 			cv::Mat frame;
 			video.read(frame);
 
-			int numFrames = 0;
-			int lastPercentage = 0;
+			unsigned int numFrames = 0;
+			unsigned int lastPercentage = 0;
 
 			LOG_DATA_INFO(FrameData().CsvColumns());
 			LOG_CORE_INFO("Video analysis started");
@@ -110,18 +126,22 @@ namespace iris
 
 			if (flagJson) 
 			{ 
-				lineGraphData.reserveLineGraphData((int)video.get(cv::CAP_PROP_FRAME_COUNT));
-				nonPassData.reserve((int)(video.get(cv::CAP_PROP_FRAME_COUNT) * 0.25)); //reserve at least one quarter of frames
+				lineGraphData.reserveLineGraphData(m_videoInfo.frameCount);
+				nonPassData.reserve(m_videoInfo.frameCount * 0.25); //reserve at least one quarter of frames
 			}
 
 			while (!frame.empty())
 			{
-				FrameData data(numFrames + 1, 1000.0 * (double)numFrames / video.get(cv::CAP_PROP_FPS));
+				FrameData data(numFrames + 1, 1000.0 * (double)numFrames / m_videoInfo.fps);
+				if (m_configuration->FrameResizeEnabled())
+				{
+					cv::resize(frame, frame, m_videoInfo.frameSize);
+				}
 				AnalyseFrame(frame, numFrames, data);
 				
 				video.read(frame); //obtain new frame
 
-				UpdateProgress(numFrames, video.get(cv::CAP_PROP_FRAME_COUNT), lastPercentage);
+				UpdateProgress(numFrames, m_videoInfo.frameCount, lastPercentage);
 				numFrames++;
 
 				LOG_DATA_INFO(data.ToCSV());
@@ -139,7 +159,7 @@ namespace iris
 
 			auto end = std::chrono::steady_clock::now();
 			LOG_CORE_INFO("Video analysis ended");
-			int elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			unsigned int elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			LOG_CORE_INFO("Elapsed time: {0} ms", elapsedTime);
 
 			if (m_flashDetection->isFail() || m_patternDetection->isFail())
@@ -156,9 +176,9 @@ namespace iris
 				Result result;
 				m_flashDetection->setResult(result);
 				if (m_patternDetection != nullptr) { m_patternDetection->setResult(result); }
-				result.VideoLen = (int)(video.get(cv::CAP_PROP_FRAME_COUNT) / video.get(cv::CAP_PROP_FPS) * 1000);
+				result.VideoLen = m_videoInfo.duration * 1000;
 				result.AnalysisTime = elapsedTime;
-				result.TotalFrame = (int)video.get(cv::CAP_PROP_FRAME_COUNT);
+				result.TotalFrame = m_videoInfo.frameCount;
 				SerializeResults(result, lineGraphData, nonPassData);
 			}
 
@@ -168,7 +188,7 @@ namespace iris
 		video.release();
 	}
 
-	void VideoAnalyser::AnalyseFrame(cv::Mat& frame, int& frameIndex, FrameData& data)
+	void VideoAnalyser::AnalyseFrame(cv::Mat& frame, unsigned int& frameIndex, FrameData& data)
 	{
 		IrisFrame irisFrame(&(frame), m_frameSrgbConverter->Convert(frame), data);
 
@@ -181,15 +201,52 @@ namespace iris
 		irisFrame.Release();
 	}
 
-	bool VideoAnalyser::VideoIsOpen(cv::VideoCapture& video, const char* videoName)
+	void VideoAnalyser::SetOptimalCvThreads(cv::Size size)
+	{
+		int num_threads = 1;
+
+		//Detection of max num of threads available
+		int max_num_threads = std::thread::hardware_concurrency();	
+
+		//Depending of the size of the frame, different number of threads will be used
+		//If the resolution is less or more than 1080, 6 threads will be used 
+		//If not more than 6 threads will be used with higher resolutions like 2K. 
+		//The research concluded that the optimal number of threads for a 1080p resolution 
+		//is 6 and for a 4K resolution is 10. 
+		//The operation (1 / 270) * (size.height - 1080) + 6 is a rule of three that 
+		//ensures these results.
+		num_threads = std::round(size.height <= 1080)				
+			? 6 : (1 / 270) * (size.height - 1080) + 6;				
+
+		//If the PC does not have the num of threads that the program requires,
+		//we will take the max num of threads that are available in the machine.
+		int threads_used = max_num_threads < num_threads && max_num_threads != 0 ? max_num_threads : num_threads;	
+
+		//Setting number of used threads
+		cv::setNumThreads(threads_used);							
+		LOG_CORE_INFO("Number of threads used: {0}", threads_used);
+	}
+
+	bool VideoAnalyser::VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video, const char* videoName)
 	{
 		if (video.isOpened())
 		{
+			m_videoInfo.fps = GetVideoFps(sourceVideo);
+			if (m_videoInfo.fps == -1)
+			{
+				LOG_CORE_ERROR("Video FPS extraction with FFmpeg failed, attempting with OpenCV");
+				m_videoInfo.fps = video.get(cv::CAP_PROP_FPS);
+			}
+
+			m_videoInfo.frameCount = video.get(cv::CAP_PROP_FRAME_COUNT);
+			m_videoInfo.frameSize = cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT));
+			m_videoInfo.duration = m_videoInfo.frameCount / (float)m_videoInfo.fps;
+
 			LOG_CORE_INFO("Video: {0} opened successful", videoName);
-			LOG_CORE_INFO("Total frames: {0}", video.get(cv::CAP_PROP_FRAME_COUNT)); 
-			LOG_CORE_INFO("FPS: {0}", video.get(cv::CAP_PROP_FPS));
-			LOG_CORE_INFO("Duration: {0}s", video.get(cv::CAP_PROP_FRAME_COUNT) / video.get(cv::CAP_PROP_FPS));
-			LOG_CORE_INFO("Video resolution: {0}x{1}", video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT));
+			LOG_CORE_INFO("Video FPS: {}", m_videoInfo.fps);
+			LOG_CORE_INFO("Total frames: {0}", m_videoInfo.frameCount); 
+			LOG_CORE_INFO("Video resolution: {0}x{1}", m_videoInfo.frameSize.width, m_videoInfo.frameSize.height);
+			LOG_CORE_INFO("Duration: {0}s", m_videoInfo.duration);
 			return true;
 		}
 
@@ -198,15 +255,59 @@ namespace iris
 		return false;
 	}
 
-	void VideoAnalyser::UpdateProgress(int& numFrames, const long& totalFrames, int& lastPercentage)
+	void VideoAnalyser::UpdateProgress(unsigned int& numFrames, const unsigned long& totalFrames, unsigned int& lastPercentage)
 	{
-		int progress = numFrames / (float)totalFrames * 100.0f;
+		unsigned int progress = numFrames / (float)totalFrames * 100.0f;
 
 		if (progress != 0 && progress % 10 == 0 && lastPercentage != progress) //display progress
 		{
 			lastPercentage = progress;
 			LOG_CORE_DEBUG("Analysed {0}%", progress);
 		}
+	}
+
+	int VideoAnalyser::GetVideoFps(const char* filePath)
+	{
+		AVFormatContext* pFormatContext = avformat_alloc_context();
+
+		if (avformat_open_input(&pFormatContext, filePath, NULL, NULL) != 0) {
+			LOG_CORE_ERROR("Unable to open file {}", filePath);
+			return -1;
+		}
+
+		// Retrieve stream information
+		if (avformat_find_stream_info(pFormatContext, NULL) < 0) {
+			LOG_CORE_ERROR("Failed to retrieve stream info");
+			return -1;
+		}
+
+		// Get the first video stream
+		int videoStreamIndex = -1;
+		for (int i = 0; i < pFormatContext->nb_streams; i++) {
+			if (pFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+				videoStreamIndex = i;
+				break;
+			}
+		}
+
+		if (videoStreamIndex == -1) {
+			LOG_CORE_ERROR("No video stream found");
+			return -1;
+		}
+
+		// Get the frame rates
+		AVRational r_frame_rate = pFormatContext->streams[videoStreamIndex]->r_frame_rate;
+		AVRational avg_frame_rate = pFormatContext->streams[videoStreamIndex]->avg_frame_rate;
+
+		LOG_CORE_DEBUG("r_frame_rate: {}/{}", r_frame_rate.num, r_frame_rate.den);
+		LOG_CORE_DEBUG("avg_frame_rate: {}/{}", avg_frame_rate.num, avg_frame_rate.den);
+
+		int fps = round(avg_frame_rate.num / (float)avg_frame_rate.den);
+
+		// Close the video file
+		avformat_close_input(&pFormatContext);
+		avformat_free_context(pFormatContext);
+		return fps;
 	}
 
 	void VideoAnalyser::SerializeResults(const Result& result, const FrameDataJson& lineGraphData, const FrameDataJson& nonPassData)
@@ -217,8 +318,8 @@ namespace iris
 		resultJson.SetParam("FrameDataResult", "FrameResultJsonRepositoryKey", "00000000-0000-0000-0000-000000000000");
 		resultJson.SetParam("FrameDataResult", "FrameDataJsonRepositoryKey", "00000000-0000-0000-0000-000000000000");
 		resultJson.SetParam("TotalFrame", result.TotalFrame);
-		resultJson.SetParam("AnalyzeTimeString", msToTimeSpan(result.AnalysisTime));
-		resultJson.SetParam("VideoLenString", msToTimeSpan(result.VideoLen));
+		resultJson.SetParam("AnalyzeTime", msToTimeSpan(result.AnalysisTime));
+		resultJson.SetParam("VideoLen", msToTimeSpan(result.VideoLen));
 		resultJson.SetParam("OverallResult", result.OverallResult);
 		resultJson.SetParam("Results", result.Results);
 		resultJson.SetParam("TotalLuminanceIncidents", result.totalLuminanceIncidents);

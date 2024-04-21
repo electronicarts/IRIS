@@ -14,8 +14,8 @@ Abstract class for Flash detection
 
 namespace iris
 {
-    CDLuminance::CDLuminance(EA::EACC::Utils::FrameConverter *converter, const short& videoFPS,const cv::Size& frameSize, FlashParams* params)
-        : Flash(videoFPS, frameSize, params)
+    CDLuminance::CDLuminance(EA::EACC::Utils::FrameConverter *converter, const short& fps,const cv::Size& frameSize, FlashParams* params)
+        : Flash(fps, frameSize, params)
     {
         m_converter = converter;
     }

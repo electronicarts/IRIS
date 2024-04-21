@@ -11,7 +11,7 @@ namespace EA::EACC::Utils
 namespace iris
 {
 	struct FlashParams;
-	struct TransitionEvaluatorParams;
+	struct TransitionTrackerParams;
 	struct PatternDetectionParams;
 	struct PatternAnalyserParams;
 	struct StraightLineDetectorParams;
@@ -42,11 +42,17 @@ namespace iris
 		inline FlashParams* GetRedSaturationFlashParams() { return m_redSaturationFlashParams; }
 		inline EA::EACC::Utils::FrameConverterParams* GetFrameSrgbConverterParams() { return m_frameSrgbConverterParams; }
 		inline EA::EACC::Utils::FrameConverterParams* GetFrameCDLuminanceConverterParams() { return m_frameCDLuminanceConverterParams; }
-		inline TransitionEvaluatorParams* GetTransitionEvaluatorParams() { return m_transitionEvaluatorParams; }
+		inline TransitionTrackerParams* GetTransitionTrackerParams() { return m_transitionTrackerParams; }
 		inline PatternDetectionParams* GetPatternDetectionParams() { return m_patternDetectionParams; }
 
 		inline bool PatternDetectionEnabled() { return m_patternDetectionEnabled; }
 		inline void SetPatternDetectionStatus(bool status) { m_patternDetectionEnabled = status; }
+		
+		inline bool FrameResizeEnabled() { return m_frameResizeEnabled; }
+		inline void SetFrameResizeEnabled(bool status) { m_frameResizeEnabled = status; }
+
+		inline float GetFrameResizeProportion() { return m_frameResizeProportion; }
+		inline void SetFrameResizeProportion(float proportion) { m_frameResizeProportion = proportion; }
 
 		void SetSafeArea(float areaProportion);
 
@@ -58,11 +64,15 @@ namespace iris
 		FlashParams* m_redSaturationFlashParams = nullptr;
 		EA::EACC::Utils::FrameConverterParams* m_frameSrgbConverterParams = nullptr;
 		EA::EACC::Utils::FrameConverterParams* m_frameCDLuminanceConverterParams = nullptr;
-		TransitionEvaluatorParams* m_transitionEvaluatorParams = nullptr;
+		TransitionTrackerParams* m_transitionTrackerParams = nullptr;
 		PatternDetectionParams* m_patternDetectionParams = nullptr;
 
 		LuminanceType m_luminanceType = LuminanceType::UN_SET;
 		bool m_patternDetectionEnabled = true;
+		bool m_frameResizeEnabled = true;
+
+		float m_frameResizeProportion = 1;
+
 		std::string m_resultsPath;
 	};
 }

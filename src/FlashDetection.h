@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "TransitionEvaluator.h"
+#include "TransitionTracker.h"
 #include "utils/FrameConverter.h"
 #include "opencv2/core/types.hpp"
 #include "iris/Configuration.h"
@@ -66,9 +66,9 @@ namespace iris
 		/// </summary>
 		/// <param name="framePos">current frame position</param>
 		/// <param name="data">FrameData to persist</param>
-		void frameDifference(FrameData& data);
+		void frameDifference(const int& framePos, FrameData& data);
 
-		TransitionEvaluator m_transitionEvaluator;
+		TransitionTracker* m_transitionTracker;
 		Flash* m_luminance = nullptr;
 		Flash* m_redSaturation = nullptr;
 		EA::EACC::Utils::FrameConverter m_sRgbConverter;

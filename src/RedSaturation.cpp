@@ -7,8 +7,8 @@
 
 namespace iris
 {
-	RedSaturation::RedSaturation(short videoFPS, const cv::Size& frameSize, FlashParams* params)
-		: Flash(videoFPS, frameSize, params)
+	RedSaturation::RedSaturation(short fps, const cv::Size& frameSize, FlashParams* params)
+		: Flash(fps, frameSize, params)
 	{
 
 	}

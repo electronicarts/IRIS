@@ -39,10 +39,12 @@ PatternDetection::PatternDetection(Configuration* configuration, const short& fp
         scaleSize = frameSize;
     }
 
-    m_safeArea = (int)(scaleSize.area() * m_params->areaProportion);
-    m_thresholdArea = (int)(scaleSize.area() * 0.20f); //20% of the screen display
-    m_frameTimeThresh = (int)(fps * m_params->timeThreshold);
-    m_contourThreshArea = (int)(scaleSize.area() * 0.00155);
+    m_safeArea = scaleSize.area() * m_params->areaProportion;
+    m_thresholdArea = scaleSize.area() * 0.20; //20% of the screen display
+    m_diffThreshold = scaleSize.area() * 0.1;
+
+    m_frameTimeThresh = fps * m_params->timeThreshold;
+    m_contourThreshArea = scaleSize.area() * 0.00155;
     m_frameSize = scaleSize.area();
 
     m_patternFrameCount = {};
@@ -57,7 +59,7 @@ PatternDetection::PatternDetection(Configuration* configuration, const short& fp
         cv::Size(2 * dilation_size + 1, 2 * dilation_size + 1),
         cv::Point(dilation_size, dilation_size));
 
-    int erosion_size = 2;
+    int erosion_size = 1;
     m_erosionElement = cv::getStructuringElement(cv::MORPH_RECT,
         cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
         cv::Point(erosion_size, erosion_size));
@@ -65,7 +67,7 @@ PatternDetection::PatternDetection(Configuration* configuration, const short& fp
 
 void PatternDetection::checkFrame(const IrisFrame& irisFrame, const int& framePos, FrameData& data)
 {
-    auto pattern = detectPattern(irisFrame);
+    auto pattern = detectPattern(irisFrame, framePos);
 
 #ifdef DEBUG_PATTERN_DETECTION
     cv::destroyAllWindows();
@@ -83,7 +85,7 @@ void PatternDetection::checkFrame(const IrisFrame& irisFrame, const int& framePo
     checkFrameCount(data);
 }
 
-PatternDetection::Pattern PatternDetection::detectPattern(const IrisFrame& irisFrame)
+PatternDetection::Pattern PatternDetection::detectPattern(const IrisFrame& irisFrame, const int& framePos)
 {
     cv::Mat luminance, luminance_8UC, iftThresh;
     cv::resize(*irisFrame.luminanceFrame, luminance, scaleSize);
@@ -148,7 +150,7 @@ bool PatternDetection::hasPattern(const cv::Mat& luminanceFrame, cv::Mat& iftThr
     iftThresh = highlightPatternArea(ift, luminanceFrame);
 
     //if the area threshold has not been reached, no harmful pattern exists
-    if (cv::countNonZero(iftThresh) < m_thresholdArea)
+    if (cv::countNonZero(iftThresh) < m_diffThreshold)
     {
         return false;
     }
@@ -173,7 +175,7 @@ cv::Mat PatternDetection::highlightPatternArea(cv::Mat& ift, const cv::Mat& lumi
     SHOW_IMG(absDiff, "Absolute Difference");
 #endif // DEBUG_IFT
     cv::Mat thresh;
-    cv::threshold(absDiff, thresh, 60, 255, cv::ThresholdTypes::THRESH_BINARY);
+    cv::threshold(absDiff, thresh, 50, 255, cv::ThresholdTypes::THRESH_BINARY);
 #ifdef DEBUG_IFT
     SHOW_IMG(thresh, "IFT Abs Diff Binary Threshold");
 #endif // DEBUG_IFT
@@ -183,7 +185,8 @@ cv::Mat PatternDetection::highlightPatternArea(cv::Mat& ift, const cv::Mat& lumi
 
 std::tuple<cv::Mat, int> PatternDetection::getPatternRegion(cv::Mat& threshIFT, cv::Mat& luminanceFrame)
 {
-    cv::erode(threshIFT, threshIFT, m_erosionElement);
+    //cv::erode(threshIFT, threshIFT, m_erosionElement);
+
 #ifdef DEBUG_PATTERN_REGION
     SHOW_IMG(threshIFT, "Erosion");
 #endif // DEBUG_PATTERN_REGION
@@ -191,7 +194,7 @@ std::tuple<cv::Mat, int> PatternDetection::getPatternRegion(cv::Mat& threshIFT, 
     //remove elements that are not part of the pattern
     auto threshContours = getContours(threshIFT);
 #ifdef DEBUG_PATTERN_REGION
-    SHOW_IMG(threshIFT, "Erosion Contours");
+    SHOW_CONTOURS(threshContours, threshIFT, "Erosion Contours");
 #endif // DEBUG_PATTERN_REGION
     auto contoursMat = moveBiggerContours(threshContours, threshIFT);
 
@@ -255,8 +258,8 @@ void PatternDetection::setPatternLuminance(Pattern& pattern, cv::Mat& patternReg
     cv::bitwise_not(lightComponents, darkComponents, patternRegion);
     SHOW_IMG(darkComponents, "Dark Components");
 
-    pattern.avgLightLuminance = (float)cv::mean(luminanceFrame, lightComponents)[0];
-    pattern.avgDarkLuminance = (float)cv::mean(luminanceFrame, darkComponents)[0];
+    pattern.avgLightLuminance = cv::mean(luminanceFrame, lightComponents)[0];
+    pattern.avgDarkLuminance = cv::mean(luminanceFrame, darkComponents)[0];
 }
 
 std::vector<std::vector<cv::Point>> PatternDetection::getContours(const cv::Mat& src)
@@ -446,7 +449,7 @@ cv::Mat FourierTransform::getPeaks(const cv::Mat& psd)
     //threshold peaks
     cv::Mat threshPSD;
     psd.convertTo(threshPSD, CV_8UC1);
-    cv::threshold(threshPSD, threshPSD, 7, 255, cv::ThresholdTypes::THRESH_OTSU);
+    double thresh = cv::threshold(threshPSD, threshPSD, 7, 255, cv::ThresholdTypes::THRESH_OTSU);
 
 #ifdef DEBUG_FFT
     fftShift(threshPSD);

@@ -16,8 +16,9 @@ option(BUILD_EXAMPLE_APP "Build Iris example console application" OFF)
 option(EXPORT_IRIS "Export and install library" ON)
 option(BUILD_SHARED_LIBS "Build iris as a shared library" OFF)
 option(BUILD_COVERAGE "Builds code coverage target" OFF)
+option(PROFILER "Enable profiling" OFF) 
 
-if (NOT UNIX)
+if (BUILD_COVERAGE AND NOT UNIX)
     set(BUILD_COVERAGE OFF)
     message("Code coverage can only be built in Linux systems")
 endif()
@@ -32,6 +33,7 @@ set(PUBLIC_HEADERS
     "include/iris/Log.h"
     "include/iris/Result.h"
     "include/iris/TotalFlashIncidents.h"
+    "include/iris/ScopeProfiler.h"
 )
 
 source_group("Public header files" FILES ${PUBLIC_HEADERS})
@@ -44,14 +46,12 @@ set(SOURCE_FILES
     "src/RedSaturation.h"
     "src/RedSaturation.cpp"
     "src/CDLuminance.cpp"
-    "src/TransitionEvaluator.cpp"
     "src/Configuration.cpp"
     "src/ConfigurationParams.h"
     "src/Flash.h" 
     "src/RelativeLuminance.h"
     "src/CDLuminance.h"
-    "src/FrameRgbConverter.h" 
-    "src/TransitionEvaluator.h" 
+    "src/FrameRgbConverter.h"
     "src/FrameData.h"
     "src/FlashDetection.h" 
     "src/FlashDetection.cpp" 
@@ -60,12 +60,19 @@ set(SOURCE_FILES
     "src/PatternDetection.h"
     "src/PatternDetection.cpp"
     "src/PhotosensitivityDetector.h"
+    "src/TransitionTracker.h"
+    "src/TransitionTrackerByFPS.h"
+    "src/TransitionTrackerByTime.h"
+    "src/TransitionTrackerByFPS.cpp"
+    "src/TransitionTrackerByTime.cpp"
+    "src/ScopeProfiler.cpp"
 )
 
 source_group("Source files" FILES ${SOURCE_FILES}) 
 
 # Dependencies
 find_package(OpenCV CONFIG REQUIRED)
+find_package(FFMPEG REQUIRED)
 add_subdirectory ("utils")
 
 if(BUILD_SHARED_LIBS)
@@ -115,6 +122,7 @@ target_link_libraries(${PROJECT_NAME}
                 PUBLIC
                     utils
                     ${OpenCV_LIBS}
+                    ${FFMPEG_LIBRARIES}
 )
 
 # ---------------------------------------------------------------------------------------
@@ -134,6 +142,14 @@ if(BUILD_TESTS)
 	enable_testing()
 	add_subdirectory("test/Iris.Tests")
 	add_subdirectory("test/AddressSanitizer.Tests")
+endif()
+
+# ---------------------------------------------------------------------------------------
+# Profiler
+# ---------------------------------------------------------------------------------------
+if(PROFILER)
+    message("Profiler enabled")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC -DPROFILING)
 endif()
 
 # ---------------------------------------------------------------------------------------
