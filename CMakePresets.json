@@ -61,7 +61,7 @@
       }
     },
     {
-      "name": "macos-default",
+      "name": "macos-debug",
       "displayName": "macOS Debug",
       "description": "Target a remote macOS system with Ninja",
       "inherits": [ "base" ],
@@ -73,6 +73,15 @@
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "macOS" ] },
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "macos-release",
+      "displayName": "macOS Release",
+      "description": "Target a remote macOS system with Ninja",
+      "inherits": [ "macos-debug" ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
@@ -158,7 +167,13 @@
       "name": "macos-debug",
       "description": "MacOS debug build",
       "inherits": "core-build",
-      "configurePreset": "macos-default"
+      "configurePreset": "macos-debug"
+    },
+    {
+        "name": "macos-release",
+        "description": "MacOS release build",
+        "inherits": "core-build",
+        "configurePreset": "macos-release"
     }
   ],
   "testPresets": [
