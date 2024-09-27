@@ -15,3 +15,4 @@ jobs:
           uses: lukka/run-vcpkg@v4
           with:
             setupOnly: true
+            vcpkgGitCommitId: 0affe8710a4a5b26328e909fe1ad7146df39d108
