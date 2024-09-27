@@ -6,10 +6,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+    
     steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-        - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+        - name: Set up cache
+          uses: actions/github-script@v7
+          with:
+            script: |
+              core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+              core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+        - uses: actions/checkout@v4
+        - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
+          run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
+          shell: bash
+
+        - uses: lukka/get-cmake@latest
 
         - name: Set up vcpkg
           uses: lukka/run-vcpkg@v4
