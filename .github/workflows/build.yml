@@ -16,3 +16,4 @@ jobs:
           with:
             vcpkgDirectory: '${{ runner.temp }}/vcpkg'
             cleanAfterBuild: true
+            setupOnly: true
