@@ -47,6 +47,8 @@ jobs:
         # Ensure that the developer command promt is present on Windows runners
         - uses: ilammy/msvc-dev-cmd@v1
 
+        - name: Install packages
+          run: apt-get install -y libxi-dev && apt-get install -y libxtst-dev
         - name: Restore from cache the dependencies and generate project files
           run: |
             cmake -DBUILD_EXAMPLE_APP=ON -DBUILD_TESTS=ON --preset linux-release
