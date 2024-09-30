@@ -61,18 +61,20 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: build/
+          path: bin/build/linux-release
        
   test:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
-          path: build/
+          path: bin/build/linux-release
         
       - name: Test
         run: |
