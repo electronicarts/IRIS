@@ -75,7 +75,10 @@ jobs:
         with:
           name: build-artifacts
           path: bin/build/linux-release
-        
+          
+      - run: git update-index --chmod=+x bin/build/linux-release/test/Iris.tests/iris_tests
+      - run: git update-index --chmod=+x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+      
       - name: Test
         run: |
           ctest --preset videolib-linux

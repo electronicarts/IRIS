@@ -178,7 +178,7 @@
   ],
   "testPresets": [
     {
-      "name": "videolib-linux",
+      "name": "test-linux",
       "configurePreset": "linux-release",
       "output": {"outputOnFailure": true},
       "environment": {
@@ -186,9 +186,17 @@
       }
     },
     {
-      "name": "videolib-windows",
+      "name": "test-windows",
       "configurePreset": "windows-release",
-      "output": {"outputOnFailure": true},
+      "output": { "outputOnFailure": true },
+      "environment": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "test-macos",
+      "configurePreset": "macos-release",
+      "output": { "outputOnFailure": true },
       "environment": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
