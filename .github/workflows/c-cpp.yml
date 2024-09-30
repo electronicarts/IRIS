@@ -58,7 +58,7 @@ jobs:
         run: |
           cmake --build --preset linux-release
 
-      - run: ls bin/build/linux-release/test/Iris.tests
+      - run: ls bin/build/linux-release/test/Iris.Tests
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
