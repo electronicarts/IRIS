@@ -82,5 +82,5 @@ jobs:
       
       - name: Test
         run: |
-          ctest --preset videolib-linux
+          ctest --preset test-linux
     
