@@ -77,8 +77,8 @@ jobs:
           name: build-artifacts
           path: bin/build/linux-release
           
-      - run: git update-index --chmod=+x ./bin/build/linux-release/test/Iris.Tests/iris_tests
-      - run: git update-index --chmod=+x ./bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+      - run: sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests
+      - run: sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
       
       - name: Test
         run: |
