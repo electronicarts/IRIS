@@ -58,8 +58,6 @@ jobs:
         run: |
           cmake --build --preset linux-release
 
-      - run: ls bin/build/linux-release/test/Iris.Tests
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -79,8 +77,8 @@ jobs:
           name: build-artifacts
           path: bin/build/linux-release
           
-      - run: git update-index --chmod=+x bin/build/linux-release/test/Iris.Tests/iris_tests
-      - run: git update-index --chmod=+x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+      - run: git update-index --chmod=+x ./bin/build/linux-release/test/Iris.Tests/iris_tests
+      - run: git update-index --chmod=+x ./bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
       
       - name: Test
         run: |
