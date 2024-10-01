@@ -114,8 +114,8 @@ jobs:
       - name: Set permissions
         if: runner.os == 'Linux'
         run: |
-          sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests \
-          sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+          chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests \
+          chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
       
       - name: Test
         run: |
