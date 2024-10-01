@@ -62,7 +62,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: bin/build/linux-release
+          path: |
+            bin/build/linux-release/example
+            bin/build/linux-release/test/Iris.Tests
+            bin/build/linux-release/test/AddressSanitizer.Tests
+            bin/build/linux-release/CTestTestfile.cmake
        
   test:
     runs-on: ubuntu-latest
