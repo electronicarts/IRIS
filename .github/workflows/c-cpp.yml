@@ -24,6 +24,7 @@ jobs:
     steps:
       - name: Set environment variable
         run: echo "CURRENT_OS=${RUNNER_OS@L}" >> $GITHUB_ENV
+        shell: bash
       
       - name: Set up cache
         uses: actions/github-script@v7
