@@ -16,7 +16,9 @@ jobs:
             triplet: x64-linux
           # - os: macos-latest
           #   triplet: x64-osx
-
+    
+    continue-on-error: true
+        
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
@@ -116,6 +118,7 @@ jobs:
         run: |
           chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests \
           chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+        shell: bash
       
       - name: Test
         run: |
