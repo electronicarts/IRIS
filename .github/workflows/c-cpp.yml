@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-    name: ${{ matrix.os }}-build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,8 +19,12 @@ jobs:
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      if: runner.os == 'Windows'
     
     steps:
+      - name: Set environment variable
+        run: echo "CURRENT_OS=${RUNNER_OS@L}" >> $GITHUB_ENV
+      
       - name: Set up cache
         uses: actions/github-script@v7
         with:
@@ -64,24 +67,24 @@ jobs:
 
       - name: Restore from cache the dependencies and generate project files
         run: |
-          cmake -DBUILD_EXAMPLE_APP=ON -DBUILD_TESTS=ON --preset linux-release
+          cmake -DBUILD_EXAMPLE_APP=ON -DBUILD_TESTS=ON --preset ${{ env.CURRENT_OS }}-release
 
       - name: Build (Release configuration)
         run: |
-          cmake --build --preset linux-release
+          cmake --build --preset ${{ env.CURRENT_OS }}-release
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
           path: |
-            bin/build/linux-release/example
-            bin/build/linux-release/test/Iris.Tests
-            bin/build/linux-release/test/AddressSanitizer.Tests
-            bin/build/linux-release/CTestTestfile.cmake
+            bin/build/${{ env.CURRENT_OS }}-release/example
+            bin/build/${{ env.CURRENT_OS }}-release/test/Iris.Tests
+            bin/build/${{ env.CURRENT_OS }}-release/test/AddressSanitizer.Tests
+            bin/build/${{ env.CURRENT_OS }}-release/CTestTestfile.cmake
        
   test:
-    name: ${{ matrix.os }}-test
+    needs: build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -93,23 +96,26 @@ jobs:
             triplet: x64-linux
           - os: macos-latest
             triplet: x64-osx
-    needs: ${{ matrix.os }}-build
 
     steps:
+      - name: Set environment variable
+        run: echo "CURRENT_OS=${RUNNER_OS@L}" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
       
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
-          path: bin/build/linux-release
+          path: bin/build/${{ env.CURRENT_OS }}-release
           
-      - if: runner.os == 'Linux'
+      - name: Set permissions
+        if: runner.os == 'Linux'
         run: |
           sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests \
           sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
       
       - name: Test
         run: |
-          ctest --preset test-linux
+          ctest --preset test-${{ env.CURRENT_OS }}
     
