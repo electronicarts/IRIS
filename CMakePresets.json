@@ -106,7 +106,6 @@
       "description": "Target Windows with the Visual Studio development environment.",
       "inherits": [ "windows-debug" ],
       "cacheVariables": {
-        "WINDOWS_PIPELINE": true,
         "CMAKE_BUILD_TYPE": "Release"
       }
     },

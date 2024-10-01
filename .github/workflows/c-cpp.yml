@@ -68,6 +68,10 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm
 
+      - name: Set vcpkg baseline
+        if: runner.os == 'Windows'
+        run: ${{ env.VCPKG_ROOT }}\vcpkg.exe x-update-baseline --add-initial-baseline
+
       - name: Restore from cache the dependencies and generate project files
         run: |
           cmake -DBUILD_EXAMPLE_APP=ON -DBUILD_TESTS=ON --preset ${{ env.CURRENT_OS }}-release
