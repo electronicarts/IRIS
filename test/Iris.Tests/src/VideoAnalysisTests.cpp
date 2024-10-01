@@ -168,28 +168,4 @@ namespace iris::Tests
 			TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/intermitentEF_RELATIVE.csv");
 		}
 	}
-
-	//TEST_F(VideoAnalysisTests, PatternCircular4_Video_Test)
-	//{
-	//	const char* sourceVideo = "data/TestVideos/Pattern - Circular 4.avi";
-	//	VideoAnalyser videoAnalyser(&configuration);
-
-	//	cv::VideoCapture video(sourceVideo);
-	//	if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
-	//	{
-	//		TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/Pattern - Circular 4_RELATIVE.csv");
-	//	}
-	//}
-
-	//TEST_F(VideoAnalysisTests, PatternCircular5_Video_Test)
-	//{
-	//	const char* sourceVideo = "data/TestVideos/Pattern - Circular 5.avi";
-	//	VideoAnalyser videoAnalyser(&configuration);
-
-	//	cv::VideoCapture video(sourceVideo);
-	//	if (videoAnalyser.VideoIsOpen(sourceVideo, video, nullptr))
-	//	{
-	//		TestVideoAnalysis(videoAnalyser, video, "data/ExpectedVideoLogFiles/Pattern - Circular 5_RELATIVE.csv");
-	//	}
-	//}
 }
