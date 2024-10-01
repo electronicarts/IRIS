@@ -44,6 +44,7 @@ jobs:
           else
             mkdir -p ${{ github.workspace }}/vcpkg/bincache
           fi
+        shell: bash
           
       - uses: lukka/get-cmake@latest
 
