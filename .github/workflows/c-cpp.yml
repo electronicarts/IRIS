@@ -70,7 +70,7 @@ jobs:
 
       - name: Set vcpkg baseline
         if: runner.os == 'Windows'
-        run: ${{ env.VCPKG_ROOT }}\vcpkg.exe x-update-baseline --add-initial-baseline
+        run: vcpkg\vcpkg.exe x-update-baseline --add-initial-baseline
 
       - name: Restore from cache the dependencies and generate project files
         run: |
