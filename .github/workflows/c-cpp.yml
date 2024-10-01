@@ -21,7 +21,6 @@ jobs:
         
     env:
       if: runner.os == 'Windows'
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
     
     steps:
@@ -40,7 +39,7 @@ jobs:
 
       - name: Create vcpkg default binary cache
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          if [ "$RUNNER_OS" == "Windows" ]; then
             mkdir -p ${{ github.workspace }}\vcpkg\bincache
           else
             mkdir -p ${{ github.workspace }}/vcpkg/bincache
