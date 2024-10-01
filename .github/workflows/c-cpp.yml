@@ -19,11 +19,10 @@ jobs:
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
-      if: runner.os == 'Windows'
     
     steps:
       - name: Set environment variable
-        run: echo "CURRENT_OS=${RUNNER_OS@L}" >> $GITHUB_ENV
+        run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         shell: bash
       
       - name: Set up cache
