@@ -4,7 +4,18 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }}-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: windows-latest
+            triplet: x64-windows
+          - os: ubuntu-latest
+            triplet: x64-linux
+          - os: macos-latest
+            triplet: x64-osx
 
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
@@ -48,6 +59,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install packages
+        if: runner.os == 'Linux'
         run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm
 
       - name: Restore from cache the dependencies and generate project files
@@ -69,8 +81,19 @@ jobs:
             bin/build/linux-release/CTestTestfile.cmake
        
   test:
-    runs-on: ubuntu-latest
-    needs: build
+    name: ${{ matrix.os }}-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: windows-latest
+            triplet: x64-windows
+          - os: ubuntu-latest
+            triplet: x64-linux
+          - os: macos-latest
+            triplet: x64-osx
+    needs: ${{ matrix.os }}-build
 
     steps:
       - uses: actions/checkout@v4
@@ -81,8 +104,10 @@ jobs:
           name: build-artifacts
           path: bin/build/linux-release
           
-      - run: sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests
-      - run: sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+      - if: runner.os == 'Linux'
+        run: |
+          sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests \
+          sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
       
       - name: Test
         run: |
