@@ -58,30 +58,46 @@ namespace iris::Tests
 				logFrameData.push_back(substr);
 			}
 
-			EXPECT_EQ(std::stoi(logFrameData[0]), data.Frame) << "Frame: " << data.Frame << '\n';
+            EXPECT_EQ(std::stoi(logFrameData[0]), data.Frame) << "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[0]);
 
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[2]), data.LuminanceAverage)) << "Frame: " << data.Frame << '\n';
-			std::string str = data.proportionToPercentage(std::stof(logFrameData[3]));
-			EXPECT_EQ(str, data.LuminanceFlashArea) << "Frame: " << data.Frame << '\n';
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[4]), data.AverageLuminanceDiff)) << "Frame: " << data.Frame << '\n';
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[5]), data.AverageLuminanceDiffAcc)) << "Frame: " << data.Frame << '\n';
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[2]), data.LuminanceAverage)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[2]) << " Actual: " << data.LuminanceAverage;
+            std::string str = data.proportionToPercentage(std::stof(logFrameData[3]));
+            EXPECT_EQ(str, data.LuminanceFlashArea) 
+				<< "Frame: " << data.Frame << " Expected: " << str << " Actual: " << data.LuminanceFlashArea;
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[4]), data.AverageLuminanceDiff)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[4]) << " Actual: " << data.AverageLuminanceDiff;
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[5]), data.AverageLuminanceDiffAcc)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[5]) << " Actual: " << data.AverageLuminanceDiffAcc;
 			
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[6]), data.RedAverage)) << "Frame: " << data.Frame << '\n';
-			str = data.proportionToPercentage(std::stof(logFrameData[7]));
-			EXPECT_EQ(str, data.RedFlashArea) << "Frame: " << data.Frame << '\n';
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[8]), data.AverageRedDiff)) << "Frame: " << data.Frame << '\n';
-			EXPECT_TRUE(CompareFloat(std::stof(logFrameData[9]), data.AverageRedDiffAcc)) << "Frame: " << data.Frame << '\n';
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[6]), data.RedAverage)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[6]) << " Actual: " << data.RedAverage;
+            str = data.proportionToPercentage(std::stof(logFrameData[7]));
+            EXPECT_EQ(str, data.RedFlashArea) 
+				<< "Frame: " << data.Frame << " Expected: " << str << " Actual: " << data.RedFlashArea;
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[8]), data.AverageRedDiff)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[8]) << " Actual: " << data.AverageRedDiff;
+            EXPECT_TRUE(CompareFloat(std::stof(logFrameData[9]), data.AverageRedDiffAcc)) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[9]) << " Actual: " << data.AverageRedDiffAcc;
 
-			EXPECT_EQ(std::stof(logFrameData[10]), data.PatternRisk) << "Frame: " << data.Frame << '\n';
+            EXPECT_EQ(std::stof(logFrameData[10]), data.PatternRisk) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stof(logFrameData[10]) << " Actual: " << data.PatternRisk;
 
-			EXPECT_EQ(std::stoi(logFrameData[11]), data.LuminanceTransitions) << "Frame: " << data.Frame << '\n';
-			EXPECT_EQ(std::stoi(logFrameData[12]), data.RedTransitions) << "Frame: " << data.Frame << '\n';
-			EXPECT_EQ(std::stoi(logFrameData[13]), data.LuminanceExtendedFailCount) << "Frame: " << data.Frame << '\n';
-			EXPECT_EQ(std::stoi(logFrameData[14]), data.RedExtendedFailCount) << "Frame: " << data.Frame << '\n';
+            EXPECT_EQ(std::stoi(logFrameData[11]), data.LuminanceTransitions) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[11]) << " Actual: " << data.LuminanceTransitions;
+            EXPECT_EQ(std::stoi(logFrameData[12]), data.RedTransitions) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[12]) << " Actual: " << data.RedTransitions;
+            EXPECT_EQ(std::stoi(logFrameData[13]), data.LuminanceExtendedFailCount) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[13]) << " Actual: " << data.LuminanceExtendedFailCount;
+            EXPECT_EQ(std::stoi(logFrameData[14]), data.RedExtendedFailCount) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[14]) << " Actual: " << data.RedExtendedFailCount;
 
-			EXPECT_EQ(std::stoi(logFrameData[15]), (int)data.luminanceFrameResult) << "Frame: " << data.Frame << '\n';
-			EXPECT_EQ(std::stoi(logFrameData[16]), (int)data.redFrameResult) << "Frame: " << data.Frame << '\n';
-			EXPECT_EQ(std::stoi(logFrameData[17]), (int)data.patternFrameResult) << "Frame: " << data.Frame << '\n';
+            EXPECT_EQ(std::stoi(logFrameData[15]), (int)data.luminanceFrameResult) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[15]) << " Actual: " << (int)data.luminanceFrameResult;
+            EXPECT_EQ(std::stoi(logFrameData[16]), (int)data.redFrameResult) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[16]) << " Actual: " << (int)data.redFrameResult;
+            EXPECT_EQ(std::stoi(logFrameData[17]), (int)data.patternFrameResult) 
+				<< "Frame: " << data.Frame << " Expected: " << std::stoi(logFrameData[17]) << " Actual: " << (int)data.patternFrameResult;
 		}
 	};
 
