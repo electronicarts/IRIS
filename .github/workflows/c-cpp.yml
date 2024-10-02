@@ -113,8 +113,8 @@ jobs:
 
     steps:
       - name: Set environment variable
-        run: echo "CURRENT_OS=${RUNNER_OS@L}" >> $GITHUB_ENV
-
+        run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/checkout@v4
       
       - name: Download build artifacts
