@@ -14,7 +14,8 @@ namespace iris
 	{
 
 	public:
-		
+
+		virtual ~TransitionTracker() {};
 
 		inline bool getLumPassWithWarning() { return m_luminanceResults.passWithWarning; };
 		inline bool getRedPassWithWarning() { return m_redResults.passWithWarning; };
@@ -52,8 +53,10 @@ namespace iris
 		/// If AnalysisByTime is enabled, add the first frame to the FrameTimeStamps structs
 		/// </summary>
 		/// <param name="data">data to persist</param>
-		virtual void SetFirstFrame(FrameData& data) {return;}
+		virtual void SetFirstFrame(FrameData& data) {}
 	protected:
+
+		TransitionTracker() {};
 
 		struct Counter
 		{

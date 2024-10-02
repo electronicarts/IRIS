@@ -26,7 +26,7 @@ namespace iris
 
 
 		void SetCurrentFrame(const IrisFrame& irisFrame) override;
-		void SetCurrentFrame(cv::Mat* bgrFrame);
+		void SetCurrentFrame(cv::Mat* bgrFrame) override;
 		
 		~RelativeLuminance();
 	protected:

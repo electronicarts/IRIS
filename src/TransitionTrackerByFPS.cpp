@@ -3,6 +3,7 @@
 namespace iris
 {
 	TransitionTrackerByFPS::TransitionTrackerByFPS(unsigned int fps, TransitionTrackerParams* params)
+		: TransitionTracker()	
 	{
 		m_params = params;
 		m_luminanceTransitionCount.count.reserve(fps); m_luminanceTransitionCount.count.emplace_back(0);

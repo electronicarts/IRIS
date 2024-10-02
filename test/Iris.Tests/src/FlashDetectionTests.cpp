@@ -23,11 +23,9 @@ namespace iris::Tests
 
 	TEST_F(FlashDetectionTests, RELATIVE_LUMINANCE)
 	{
-        
         configuration.SetLuminanceType(Configuration::LuminanceType::RELATIVE);
         configuration.Init();
-
-
+        
         cv::Size size(100, 100);
 
         cv::Mat blackFrame(size, CV_8UC3, black); //lum = 0f

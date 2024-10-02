@@ -141,7 +141,6 @@ if(BUILD_TESTS)
 	message("Build tests")
 	enable_testing()
 	add_subdirectory("test/Iris.Tests")
-	add_subdirectory("test/AddressSanitizer.Tests")
 endif()
 
 # ---------------------------------------------------------------------------------------

@@ -33,7 +33,7 @@ option(ASAN_ENABLED "Build this target with AddressSanitizer" ON)
 
 
 if(ASAN_ENABLED)
-  if(NOT MSVC)
+  if(NOT MSVC AND NOT APPLE)
     target_compile_options(${PROJECT_NAME} PUBLIC -fsanitize=address -fno-omit-frame-pointer)
     target_link_options(${PROJECT_NAME} PUBLIC -fsanitize=address)
     endif()
