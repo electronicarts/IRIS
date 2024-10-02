@@ -130,9 +130,9 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests && sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+              sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            chmod 755 bin/build/macos-release/test/Iris.Tests/iris_tests && chmod 755 bin/build/macos-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+            chmod 755 bin/build/macos-release/test/Iris.Tests/iris_tests
           fi  
         shell: bash
       
