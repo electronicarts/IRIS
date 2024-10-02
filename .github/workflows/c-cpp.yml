@@ -117,7 +117,7 @@ jobs:
       - name: Set environment variable
         run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         shell: bash
-        
+
       - uses: actions/checkout@v4
       
       - name: Download build artifacts
@@ -127,8 +127,13 @@ jobs:
           path: bin/build/${{ env.CURRENT_OS }}-release
           
       - name: Set permissions
-        if: runner.os == 'Linux'
-        run: sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests && sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests && sudo chmod +x bin/build/linux-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+          else if [ "$RUNNER_OS" == "macOS" ]; then
+            chmod 755 bin/build/macos-release/test/Iris.Tests/iris_tests && chmod 755 bin/build/macos-release/test/AddressSanitizer.Tests/AddressSanitizer.Tests
+          fi  
         shell: bash
       
       - name: Test
