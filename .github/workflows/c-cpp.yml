@@ -20,7 +20,6 @@ jobs:
     continue-on-error: true
         
     env:
-      if: runner.os == 'Windows'
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
     
     steps:
@@ -73,6 +72,9 @@ jobs:
       - name: Install packages
         if: runner.os == 'Linux'
         run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm
+        
+      - if: runner.os == 'macOS'
+        run: brew install nasm
 
       - name: Set vcpkg baseline
         if: runner.os == 'Windows'
@@ -115,6 +117,7 @@ jobs:
       - name: Set environment variable
         run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         shell: bash
+        
       - uses: actions/checkout@v4
       
       - name: Download build artifacts
