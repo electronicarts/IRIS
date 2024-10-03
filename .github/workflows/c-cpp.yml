@@ -1,6 +1,10 @@
 name: C/C++ CI
 
-on: [push]
+on:
+  push:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,9 +17,9 @@ jobs:
            - os: windows-latest
              triplet: x64-windows
            - os: ubuntu-latest
-            triplet: x64-linux
+             triplet: x64-linux
           # - os: macos-latest
-            # triplet: x64-osx
+          # triplet: x64-osx
     
     continue-on-error: true
         
