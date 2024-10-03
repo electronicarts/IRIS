@@ -7,15 +7,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest, windows-latest]
         #ubuntu-latest, macos-latest, windows-latest]
         include:
-          #  - os: windows-latest
-          #    triplet: x64-windows
-          # - os: ubuntu-latest
-          #   triplet: x64-linux
-          - os: macos-latest
-            triplet: x64-osx
+           - os: windows-latest
+             triplet: x64-windows
+           - os: ubuntu-latest
+            triplet: x64-linux
+          # - os: macos-latest
+            # triplet: x64-osx
     
     continue-on-error: true
         
@@ -103,15 +103,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest, windows-latest]
         #ubuntu-latest, macos-latest, windows-latest]
         include:
-          # - os: windows-latest
-          #   triplet: x64-windows
-          # - os: ubuntu-latest
-            # triplet: x64-linux
-          - os: macos-latest
-            triplet: x64-osx
+          - os: windows-latest
+            triplet: x64-windows
+          - os: ubuntu-latest
+            triplet: x64-linux
+          # - os: macos-latest
+          #   triplet: x64-osx
 
     steps:
       - name: Set environment variable
