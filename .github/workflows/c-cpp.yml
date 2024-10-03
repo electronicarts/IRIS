@@ -132,7 +132,7 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt-get update && apt-get install libsm6 libxext6 -y && sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests
+              sudo apt-get update && sudo apt-get install libsm6 libxext6 -y && sudo chmod +x bin/build/linux-release/test/Iris.Tests/iris_tests
           elif [ "$RUNNER_OS" == "macOS" ]; then
             chmod 755 bin/build/macos-release/test/Iris.Tests/iris_tests
           fi  
