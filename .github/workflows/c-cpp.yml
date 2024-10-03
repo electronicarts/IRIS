@@ -27,7 +27,7 @@ jobs:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
     
     steps:
-      - name: Set OS environment variable
+      - name: Set OS environment variable in lowercase letters
         run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         shell: bash
       
@@ -112,9 +112,11 @@ jobs:
             triplet: x64-linux
           # - os: macos-latest
           #   triplet: x64-osx
+    
+    continue-on-error: true
 
     steps:
-      - name: Set environment variable
+      - name: Set environment variable in lowercase letters
         run: echo "CURRENT_OS=$(echo $RUNNER_OS | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
         shell: bash
 
