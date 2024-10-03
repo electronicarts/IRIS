@@ -8,7 +8,11 @@
     "giflib",
     {
       "name": "opencv",
-      "features": [ "ffmpeg", "contrib" ]
+      "features": [
+        "ffmpeg",
+        "contrib"
+      ]
     }
-  ]
+  ],
+  "builtin-baseline": "c60b4ba3923198f119d12fb5b7fdb86b3cd7f0c4"
 }

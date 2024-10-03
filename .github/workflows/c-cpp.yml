@@ -80,10 +80,6 @@ jobs:
       - if: runner.os == 'macOS'
         run: brew install nasm
 
-      - name: Set vcpkg baseline
-        if: runner.os == 'Windows'
-        run: vcpkg\vcpkg.exe x-update-baseline --add-initial-baseline
-
       - name: Restore from cache the dependencies and generate project files
         run: |
           cmake -DBUILD_EXAMPLE_APP=ON -DBUILD_TESTS=ON --preset ${{ env.CURRENT_OS }}-release
@@ -95,7 +91,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
+          name: build-artifacts-${{ env.CURRENT_OS }}
           path: |
             bin/build/${{ env.CURRENT_OS }}-release/example
             bin/build/${{ env.CURRENT_OS }}-release/test/Iris.Tests
@@ -127,7 +123,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-artifacts
+          name: build-artifacts-${{ env.CURRENT_OS }}
           path: bin/build/${{ env.CURRENT_OS }}-release
           
       - name: Set permissions
