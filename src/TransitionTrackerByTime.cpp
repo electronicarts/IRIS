@@ -2,7 +2,8 @@
 
 namespace iris
 {
-	TransitionTrackerByTime::TransitionTrackerByTime(unsigned int starterFpsReserve, TransitionTrackerParams* params)
+	TransitionTrackerByTime::TransitionTrackerByTime(unsigned int starterFpsReserve, TransitionTrackerParams* params) 
+		: TransitionTracker()
 	{
 		m_params = params;
 		m_luminanceTransitionCount.count.reserve(starterFpsReserve); m_luminanceTransitionCount.count.emplace_back(0);
@@ -39,13 +40,13 @@ namespace iris
 		m_fourSecondTimeStamps.GetFrameNumToRemove(data.TimeStampVal);
 
 		//update transition lists as 1s has passed
-		for (m_oneSecondFramesToRemove; m_oneSecondFramesToRemove > 0; m_oneSecondFramesToRemove--)
+		for (; m_oneSecondFramesToRemove > 0; m_oneSecondFramesToRemove--)
 		{
 			m_luminanceTransitionCount.updatePassed();
 			m_redTransitionCount.updatePassed();
 		}
 		//update extended failure as 5s have passed			 	
-		for (m_fiveSecondFramesToRemove; m_fiveSecondFramesToRemove > 0; m_fiveSecondFramesToRemove--)
+		for (; m_fiveSecondFramesToRemove > 0; m_fiveSecondFramesToRemove--)
 		{
 			m_luminanceExtendedCount.updatePassed();
 			m_redExtendedCount.updatePassed();

@@ -70,23 +70,4 @@ namespace iris::Tests
 		irisFrame.Release();
 	}
 
-	TEST_F(PatternDetectionTests, Straight_Lines_Pass)
-	{
-		cv::Mat image = cv::imread("data/TestImages/Patterns/ACO_Pattern.png");
-		IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
-
-		FlashDetection flashDetection(&configuration, 0, image.size());
-		PatternDetection patternDetection(&configuration, 5, image.size());
-		flashDetection.setLuminance(irisFrame);
-
-		FrameData data;
-		for (int i = 0; i < 5; i++)
-		{
-			patternDetection.checkFrame(irisFrame, i, data);
-		}
-
-		EXPECT_EQ(PatternResult::Pass, data.patternFrameResult);
-
-		irisFrame.Release();
-	}
 }

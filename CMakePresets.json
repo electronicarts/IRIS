@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 21,
@@ -106,7 +106,6 @@
       "description": "Target Windows with the Visual Studio development environment.",
       "inherits": [ "windows-debug" ],
       "cacheVariables": {
-        "WINDOWS_PIPELINE": true,
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
@@ -178,15 +177,25 @@
   ],
   "testPresets": [
     {
-      "name": "videolib-linux",
+      "name": "test-linux",
       "configurePreset": "linux-release",
+      "output": {"outputOnFailure": true},
       "environment": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     {
-      "name": "videolib-windows",
+      "name": "test-windows",
       "configurePreset": "windows-release",
+      "output": { "outputOnFailure": true },
+      "environment": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "test-macos",
+      "configurePreset": "macos-release",
+      "output": { "outputOnFailure": true },
       "environment": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

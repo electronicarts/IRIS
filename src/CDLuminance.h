@@ -30,7 +30,7 @@ namespace iris
 		/// <param name="flashThreshold"></param>
 		CDLuminance(EA::EACC::Utils::FrameConverter* converter, const short& fps, const cv::Size& frameSize, FlashParams* params);
 		void SetCurrentFrame(const IrisFrame& irisFrame) override;
-		void SetCurrentFrame(cv::Mat* bgrFrame);
+		void SetCurrentFrame (cv::Mat* bgrFrame) override;
 
 		~CDLuminance();
 	protected:
