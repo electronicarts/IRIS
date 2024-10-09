@@ -30,20 +30,21 @@ namespace iris
 		
 		~RelativeLuminance();
 	protected:
-		static cv::Scalar rgbValues;
 
 		struct ConvertToRelativeLuminance 
 		{
 			ConvertToRelativeLuminance(cv::Mat* luminanceMat) { luminance = luminanceMat; };
 			cv::Mat* luminance = nullptr;
 
-			void operator()(cv::Vec3f& pixel, const int* position) const
+			void operator()(cv::Vec3d& pixel, const int* position) const
 			{
 				//Y = 0.0722 * B + 0.7152 * G + 0.2126 * R where B, G and R
-				luminance->ptr<float>(position[0])[position[1]] = 0.0722f * pixel[0] + 0.7152f * pixel[1] + 0.2126f * pixel[2];
+				luminance->ptr<double>(position[0])[position[1]] = rgbValues[0] * pixel[0] + rgbValues[1] * pixel[1] + rgbValues[2] * pixel[2];
 			}
 		};
 
 	private:
+		static cv::Scalar rgbValues;
+
 	};
 }

@@ -21,13 +21,13 @@ namespace iris::Tests
 		}
 	};
 
-	TEST_F(RedSaturationTests, Positive_FrameDifference)
-	{
+    TEST_F(RedSaturationTests, Positive_FrameDifference)
+    {
 		cv::Size size(100, 100);
 		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
 		cv::Mat redImageBgr(size, CV_8UC3, red);
 		cv::Mat* pRedSrgb = frameRgbConverter->Convert(redImageBgr);
-		
+
 		cv::Mat blackImageBgr(size, CV_8UC3, black);
 		cv::Mat* pBlackSrgb = frameRgbConverter->Convert(blackImageBgr);
 
@@ -36,21 +36,21 @@ namespace iris::Tests
 
 		cv::Mat* matDiff = redSaturation.FrameDifference();
 
-		float testChangeValues = matDiff->at<float>(0, 0);
+		double testChangeValues = matDiff->at<double>(0, 0);
 
 		EXPECT_EQ(320, testChangeValues);
 
 		if (matDiff != nullptr) {
-			matDiff->release();
-			delete matDiff;
+		matDiff->release();
+		delete matDiff;
 		}
 
 		delete pRedSrgb;
 		delete pBlackSrgb;
-	}
+    }
 
-	TEST_F(RedSaturationTests, Negative_FrameDifference)
-	{
+    TEST_F(RedSaturationTests, Negative_FrameDifference)
+    {
 		cv::Size size(2000, 2000);
 		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
 		cv::Mat redImageBgr(size, CV_8UC3, red);
@@ -64,21 +64,21 @@ namespace iris::Tests
 
 		cv::Mat* matDiff = redSaturation.FrameDifference();
 
-		float testChangeValues = matDiff->at<float>(0, 0);
+		double testChangeValues = matDiff->at<double>(0, 0);
 
 		EXPECT_EQ(-320, testChangeValues);
 
 		if (matDiff != nullptr) {
-			matDiff->release();
-			delete matDiff;
+		matDiff->release();
+		delete matDiff;
 		}
 
 		delete pRedSrgb;
 		delete pBlackSrgb;
-	}
+    }
 
-	TEST_F(RedSaturationTests, Positive_FrameDifference_PartialRed)
-	{
+    TEST_F(RedSaturationTests, Positive_FrameDifference_PartialRed)
+    {
 		cv::Size size(100, 100);
 		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
 
@@ -94,20 +94,20 @@ namespace iris::Tests
 
 		cv::Mat* matDiff = redSaturation.FrameDifference();
 
-		float testChangeValues = matDiff->at<float>(21, 21);
-		float testNullChangeValues = matDiff->at<float>(0, 0);
+		double testChangeValues = matDiff->at<double>(21, 21);
+		double testNullChangeValues = matDiff->at<double>(0, 0);
 
 		EXPECT_EQ(320, testChangeValues);
 		EXPECT_EQ(0, testNullChangeValues);
 
 		if (matDiff != nullptr) {
-			matDiff->release();
-			delete matDiff;
+		matDiff->release();
+		delete matDiff;
 		}
 
 		delete pRedSrgb;
 		delete pBlackSrgb;
-	}
+    }
 
 	TEST_F(RedSaturationTests, Negative_FrameDifference_PartialRed)
 	{
@@ -127,8 +127,8 @@ namespace iris::Tests
 
 		cv::Mat* matDiff = redSaturation.FrameDifference();
 
-		float testChangeValues = matDiff->at<float>(21, 21);
-		float testNullChangeValues = matDiff->at<float>(0, 0);
+		double testChangeValues = matDiff->at<double>(21, 21);
+		double testNullChangeValues = matDiff->at<double>(0, 0);
 
 		EXPECT_EQ(-320, testChangeValues);
 		EXPECT_EQ(0, testNullChangeValues);
@@ -146,13 +146,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation (5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-		float testLastAvg = 5.2f;
-
+		double testLastAvg = 5.2;
+		
 		//SameSign (positive) 0 case && !newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(0, testLastAvg);
 
-		EXPECT_EQ(5.2f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(5.2, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 
@@ -160,14 +159,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-
-		float testLastAvg = 5.2f;
+		double testLastAvg = 5.2;
 
 		//SameSign (positive) && !newTransition
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.0f, testLastAvg);
-
-		EXPECT_EQ(15.2f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(15.2, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 
@@ -175,14 +172,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-
-		float testLastAvg = 15.2f;
+		double testLastAvg = 15.2;
 
 		//SameSign (positive) && newTransition
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(5.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(5.0f, testLastAvg);
-
-		EXPECT_EQ(20.2f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(20.2, transitionResult.lastAvgDiffAcc);
 		EXPECT_TRUE(transitionResult.checkResult);
 	}
 
@@ -190,14 +185,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-		
-		float testLastAvg = 20.2f;
+		double testLastAvg = 20.2;
 
 		//SameSign (positive) && !newTransition (last was a transition)
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.3, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.3f, testLastAvg);
-
-		EXPECT_EQ(30.5f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(30.5, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 	
@@ -205,14 +198,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-		
-		float testLastAvg = 30.5f;
+		double testLastAvg = 30.5;
 
 		//!SameSign (negative) && newTransition 
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-20.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-20.0f, testLastAvg);
-
-		EXPECT_EQ(-20.0f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-20.0, transitionResult.lastAvgDiffAcc);
 		EXPECT_TRUE(transitionResult.checkResult);
 	}
 
@@ -220,14 +211,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-		
-		float testLastAvg = -20.0f;
+		double testLastAvg = -20.0;
 
 		//SameSign (positive) && !newTransition (last was a transition)
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(25.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(25.0f, testLastAvg);
-
-		EXPECT_EQ(25.0f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(25.0, transitionResult.lastAvgDiffAcc);
 		EXPECT_TRUE(transitionResult.checkResult);
 	}
 
@@ -235,29 +224,25 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
-		
-		float testLastAvg = 25.0f;
+		double testLastAvg = 25.0;
 
 		//!SameSign (negative) && !newTransition
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-10.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-10.0f, testLastAvg);
-
-		EXPECT_EQ(-10.0f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-10.0, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 	
 	TEST_F(RedSaturationTests, CheckTransition_Negative_Value_To_Zero)
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
 		
-		float testLastAvg = -10.0f;
+		double testLastAvg = -10.0;
 
 		//SameSign (negative) 0 case && !newTransition
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(0.0, testLastAvg);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(0.0f, testLastAvg);
-
-		EXPECT_EQ(-10.0f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-10.0, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 
@@ -265,12 +250,12 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 		
-		float testLastAvg = -10.0f;
+		double testLastAvg = -10.0;
 
 		//SameSign (negative) && newTransition
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-15.0f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-15.0, testLastAvg);
 
-		EXPECT_EQ(-25.0f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-25.0, transitionResult.lastAvgDiffAcc);
 		EXPECT_TRUE(transitionResult.checkResult);
 	}
 
@@ -279,13 +264,13 @@ namespace iris::Tests
 		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
 
 		
-		float testLastAvg = -25.0f;
+		double testLastAvg = -25.0;
 
 		//SameSign (negative) && !newTransition (last was a transition)
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-30.6f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-30.6, testLastAvg);
 
-		EXPECT_EQ(-55.6f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-55.6, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 
@@ -293,15 +278,14 @@ namespace iris::Tests
 	{
 		RedSaturation redSaturation(2, cv::Size(), configuration.GetRedSaturationFlashParams());
 		
-		float testLastAvg = 0.0f;
+		double testLastAvg = 0.0;
 
 		//SameSign (negative) && !newTransition (last was a transition)
+		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-25.6, testLastAvg);
+		transitionResult = redSaturation.CheckTransition(-30.6, transitionResult.lastAvgDiffAcc);
+		transitionResult = redSaturation.CheckTransition(-10.6, transitionResult.lastAvgDiffAcc);
 
-		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-25.6f, testLastAvg);
-		transitionResult = redSaturation.CheckTransition(-30.6f, transitionResult.lastAvgDiffAcc);
-		transitionResult = redSaturation.CheckTransition(-10.6f, transitionResult.lastAvgDiffAcc);
-
-		EXPECT_EQ(-41.2f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(-41.2, transitionResult.lastAvgDiffAcc);
 		EXPECT_FALSE(transitionResult.checkResult);
 	}
 
@@ -317,10 +301,10 @@ namespace iris::Tests
 		redSaturation.SetCurrentFrame(imageSbgr);
 
 		cv::Mat* frameDiff = redSaturation.FrameDifference();
-		float avgDifference = redSaturation.CheckSafeArea(frameDiff);
+		double avgDifference = redSaturation.CheckSafeArea(frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = redSaturation.GetFlashArea();
+		double flashAreaProportion = redSaturation.GetFlashArea();
 		EXPECT_EQ(0, flashAreaProportion);
 
 		delete imageSbgr;
@@ -331,7 +315,7 @@ namespace iris::Tests
 	{
 		cv::Size size(5, 5);
 
-		float frameDiffArray[5][5] = {
+		double frameDiffArray[5][5] = {
 				{ 200, 200, 200, 0, 0 },
 				{ 200, 200, 0, 0, 0 },
 				{ 0, 0, 0, 0, 0 },
@@ -350,11 +334,11 @@ namespace iris::Tests
 		cv::Mat* imageSbgr2 = frameRgbConverter->Convert(imageBgr2);
 		redSaturation.SetCurrentFrame(imageSbgr2);
 
-		float avgDifference = redSaturation.CheckSafeArea(&frameDiff);
+		double avgDifference = redSaturation.CheckSafeArea(&frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = redSaturation.GetFlashArea();
-		EXPECT_TRUE(CompareFloat(0.2, flashAreaProportion));
+		double flashAreaProportion = redSaturation.GetFlashArea();
+		EXPECT_TRUE(CompareDouble(0.2, flashAreaProportion));
 
 		delete imageSbgr;
 		delete imageSbgr2;
@@ -374,10 +358,10 @@ namespace iris::Tests
 		redSaturation.SetCurrentFrame(imageSbgr2);
 
 		cv::Mat* frameDiff = redSaturation.FrameDifference();
-		float avgDifference = redSaturation.CheckSafeArea(frameDiff);
+		double avgDifference = redSaturation.CheckSafeArea(frameDiff);
 		EXPECT_EQ(320, avgDifference);
 
-		float flashAreaProportion = redSaturation.GetFlashArea();
+		double flashAreaProportion = redSaturation.GetFlashArea();
 		EXPECT_EQ(1, flashAreaProportion);
 
 		delete imageSbgr;

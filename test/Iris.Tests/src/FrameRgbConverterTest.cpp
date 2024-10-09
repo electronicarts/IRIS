@@ -26,8 +26,8 @@ namespace iris::Tests
 			for (int y = 0; y < sRgbMat->cols; y++) {
 				int vSource = (int)testArr[x][y];
 				cv::Mat* m = converter->GetTable();
-				float fTarget = m->at<float>(vSource, 0);
-				float fCurrent = sRgbMat->at<float>(x, y);
+				double fTarget = m->at<double>(vSource, 0);
+				double fCurrent = sRgbMat->at<double>(x, y);
 				EXPECT_EQ(fCurrent, fTarget);
 			}
 		}

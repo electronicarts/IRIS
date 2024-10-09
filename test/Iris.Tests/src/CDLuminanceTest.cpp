@@ -30,7 +30,7 @@ namespace iris::Tests
 		
 		cdLuminance.SetCurrentFrame(&imageBgr);
 		cv::Mat* luminance = cdLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
+		double testLum = luminance->at<double>(0, 0);
 		EXPECT_EQ(200, testLum);
 
 		imageBgr.release();
@@ -44,8 +44,8 @@ namespace iris::Tests
 
 		cdLuminance.SetCurrentFrame(&imageBgr);
 		cv::Mat* luminance = cdLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
-		EXPECT_EQ(0.07f, testLum);
+		double testLum = luminance->at<double>(0, 0);
+		EXPECT_EQ(0.07, testLum);
 	}
 
 	TEST_F(CDLuminanceTest, Luminance_When_GrayFrame_Test)
@@ -56,8 +56,8 @@ namespace iris::Tests
 
 		cdLuminance.SetCurrentFrame(&imageBgr);
 		cv::Mat* luminance = cdLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
-		EXPECT_EQ(46.48f, testLum);
+		double testLum = luminance->at<double>(0, 0);
+		EXPECT_EQ(46.48, testLum);
 
 		imageBgr.release();
 	}
@@ -70,8 +70,8 @@ namespace iris::Tests
 
 		cdLuminance.SetCurrentFrame(&imageBgr);
 		cv::Mat* luminance = cdLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
-		EXPECT_EQ(2.53f, testLum);
+		double testLum = luminance->at<double>(0, 0);
+		EXPECT_EQ(2.53, testLum);
 
 		imageBgr.release();
 	}
@@ -86,10 +86,10 @@ namespace iris::Tests
 		cdLuminance.SetCurrentFrame(&imageBgr);
 
 		cv::Mat* frameDiff = cdLuminance.FrameDifference();
-		float avgDifference = cdLuminance.CheckSafeArea(frameDiff);
+		double avgDifference = cdLuminance.CheckSafeArea(frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = cdLuminance.GetFlashArea();
+		double flashAreaProportion = cdLuminance.GetFlashArea();
 		EXPECT_EQ(0, flashAreaProportion);
 
 		delete frameDiff;
@@ -99,7 +99,7 @@ namespace iris::Tests
 	{
 		cv::Size size(5, 5);
 
-		float frameDiffArray[5][5] = {
+		double frameDiffArray[5][5] = {
 				{ 200, 200, 200, 0, 0 },
 				{ 200, 200, 0, 0, 0 },
 				{ 0, 0, 0, 0, 0 },
@@ -116,11 +116,11 @@ namespace iris::Tests
 		cv::Mat imageBgr2(size, CV_8UC3, white);
 		cdLuminance.SetCurrentFrame(&imageBgr2);
 
-		float avgDifference = cdLuminance.CheckSafeArea(&frameDiff);
+		double avgDifference = cdLuminance.CheckSafeArea(&frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = cdLuminance.GetFlashArea();
-		EXPECT_TRUE(CompareFloat(0.2, flashAreaProportion));
+		double flashAreaProportion = cdLuminance.GetFlashArea();
+		EXPECT_TRUE(CompareDouble(0.2, flashAreaProportion));
 	}
 
 	TEST_F(CDLuminanceTest, SafeArea_100_Percent_Change_Threshold)
@@ -135,10 +135,10 @@ namespace iris::Tests
 		cdLuminance.SetCurrentFrame(&imageBgr2);
 
 		cv::Mat* frameDiff = cdLuminance.FrameDifference();
-		float avgDifference = cdLuminance.CheckSafeArea(frameDiff);
-		EXPECT_TRUE(CompareFloat(197.47, avgDifference));
+		double avgDifference = cdLuminance.CheckSafeArea(frameDiff);
+		EXPECT_TRUE(CompareDouble(197.47, avgDifference));
 
-		float flashAreaProportion = cdLuminance.GetFlashArea();
+		double flashAreaProportion = cdLuminance.GetFlashArea();
 		EXPECT_EQ(1, flashAreaProportion);
 
 		delete frameDiff;

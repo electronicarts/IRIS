@@ -13,7 +13,7 @@ Abstract class for Flash detection
 
 namespace iris
 {
-    cv::Scalar RelativeLuminance::rgbValues(0.0722f, 0.7152f, 0.2126f);
+    cv::Scalar RelativeLuminance::rgbValues(0.0722, 0.7152, 0.2126);
 
     RelativeLuminance::RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params)
         : Flash(fps, frameSize, params)
@@ -33,8 +33,8 @@ namespace iris
     /// <param name="sRgbFrame"></param>
     void RelativeLuminance::SetCurrentFrame(const IrisFrame& irisFrame)
     {
-        cv::Mat* frame = new cv::Mat(irisFrame.sRgbFrame->size(), CV_32FC1);
-        irisFrame.sRgbFrame->forEach<cv::Vec3f>(ConvertToRelativeLuminance(frame));
+        cv::Mat* frame = new cv::Mat(irisFrame.sRgbFrame->size(), CV_64FC1);
+        irisFrame.sRgbFrame->forEach<cv::Vec3d>(ConvertToRelativeLuminance(frame));
         
         ReleaseLastFrame();
         Flash::SetCurrentFrame(frame);
@@ -42,8 +42,8 @@ namespace iris
 
     void RelativeLuminance::SetCurrentFrame(cv::Mat* bgrFrame)
     {
-        cv::Mat* frame = new cv::Mat(bgrFrame->size(), CV_32FC1);
-        bgrFrame->forEach<cv::Vec3f>(ConvertToRelativeLuminance(frame));
+        cv::Mat* frame = new cv::Mat(bgrFrame->size(), CV_64FC1);
+        bgrFrame->forEach<cv::Vec3d>(ConvertToRelativeLuminance(frame));
 
         ReleaseLastFrame();
         Flash::SetCurrentFrame(frame);

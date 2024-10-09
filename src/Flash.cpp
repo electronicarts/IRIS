@@ -60,7 +60,7 @@ namespace iris
         return ptrFrameDiff;
     }
 
-    float Flash::FrameMean()
+    double Flash::FrameMean()
     {
         return cv::mean(*currentFrame)[0];
     }
@@ -74,7 +74,7 @@ namespace iris
         m_avgCurrentFrame = FrameMean();
     }
 
-    float Flash::CheckSafeArea(cv::Mat* frameDifference)
+    double Flash::CheckSafeArea(cv::Mat* frameDifference)
     {
         int variation = cv::countNonZero(*frameDifference);
         m_flashArea = variation / (float)m_frameSize;
@@ -87,10 +87,10 @@ namespace iris
         return 0;
     }
 
-    bool Flash::IsFlashTransition(const float& lastAvgDiffAcc, const float& avgDiffAcc, const float& threshold)
+    bool Flash::IsFlashTransition(const double& lastAvgDiffAcc, const double& avgDiffAcc, const double& threshold)
     {
         //if the luminance of the darker image is not below 0.8, no transition occurs (not applicable to red saturation)
-        float darkerDiff = m_avgLastFrame < m_avgCurrentFrame ? m_avgLastFrame : m_avgCurrentFrame;
+        double darkerDiff = m_avgLastFrame < m_avgCurrentFrame ? m_avgLastFrame : m_avgCurrentFrame;
         
         //if tendency hasn't changed, check if last avg was a transition or part of 
         if (SameSign(lastAvgDiffAcc, avgDiffAcc) && std::abs(lastAvgDiffAcc) >= threshold)
@@ -104,7 +104,7 @@ namespace iris
         return false; //no flash
     }
 
-    Flash::CheckTransitionResult Flash::CheckTransition(float avgDiff, float lastAvgDiffAcc)
+    Flash::CheckTransitionResult Flash::CheckTransition(double avgDiff, double lastAvgDiffAcc)
     {
         CheckTransitionResult result;
         result.lastAvgDiffAcc = lastAvgDiffAcc;
@@ -132,9 +132,9 @@ namespace iris
         return result;
     }
 
-    float Flash::roundoff(float value, unsigned char prec)
+    double Flash::roundoff(double value, unsigned char prec)
     {
-        float pow_10 = std::pow(10.0f, (float)prec);
+        double pow_10 = std::pow(10.0, (double)prec);
         return std::round(value * pow_10) / pow_10;
     }
 
@@ -157,42 +157,4 @@ namespace iris
         }
     }
 
-
-    ///Old calculation
-    //float Flash::CheckSafeArea(cv::Mat* frameDifference)
-    //{
-    //    cv::Mat positiveValues(frameDifference->size(), CV_32FC1);
-    //    cv::Mat negativeValues(frameDifference->size(), CV_32FC1);
-
-    //    cv::threshold(*frameDifference, positiveValues, 0, 320, cv::ThresholdTypes::THRESH_TOZERO);
-    //    cv::threshold(*frameDifference, negativeValues, 0, 320, cv::ThresholdTypes::THRESH_TOZERO_INV);
-    //    
-    //    int posVariationArea = cv::countNonZero(positiveValues);
-    //    int negVariationArea = cv::countNonZero(negativeValues);
-
-    //    float posVariationAverage = 0;
-    //    float negVariationAverage = 0;
-
-    //    if (posVariationArea + negVariationArea >= m_safeArea) //minimum variation size 
-    //    {
-    //        if (posVariationArea > 0)
-    //        {
-    //            posVariationAverage = (float)cv::sum(positiveValues)[0] / posVariationArea;
-    //        }
-    //        if (negVariationArea > 0)
-    //        {
-    //            negVariationAverage = (float)cv::sum(negativeValues)[0] / negVariationArea;
-    //        }
-    //    }
-
-    //    // Get highest abs average diff to mark tendency
-    //    if (abs(posVariationAverage) > abs(negVariationAverage))
-    //    {
-    //        return posVariationAverage;
-    //    }
-    //    else
-    //    {
-    //        return negVariationAverage;
-    //    }
-    //}
 }

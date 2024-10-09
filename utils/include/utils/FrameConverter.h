@@ -15,8 +15,8 @@ namespace EA::EACC::Utils
 {
 	struct FrameConverterParams
 	{
-		FrameConverterParams(std::vector<float> values) : values(values) {};
-		std::vector<float> values; //The input array containing the values for the convertion
+		FrameConverterParams(std::vector<double> values) : values(values) {};
+		std::vector<double> values; //The input array containing the values for the convertion
 	};
 
 	class FrameConverter
@@ -26,7 +26,7 @@ namespace EA::EACC::Utils
 		/// Create an instance of the Rgb converter
 		/// </summary>
 		/// <param name="sRgbValues">The array of decimal values for Bgr to sRgb convertion</param>
-		FrameConverter(std::vector<float>& c);
+		FrameConverter(std::vector<double>& c);
 
 		/// <summary>
 		/// Create an instance of the Rgb converter

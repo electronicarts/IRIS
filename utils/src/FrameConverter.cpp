@@ -5,7 +5,7 @@
 
 namespace EA::EACC::Utils
 {
-	FrameConverter::FrameConverter(std::vector<float>& sRgbValues)
+	FrameConverter::FrameConverter(std::vector<double>& sRgbValues)
 	{
 		m_pMatValues = new cv::Mat(sRgbValues, true);
 	}

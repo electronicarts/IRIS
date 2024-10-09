@@ -70,6 +70,11 @@ namespace iris::Tests
 		return fabs(a - b) <= errorMargin;
 	}
 
+	static bool CompareDouble(const double& a, const double& b, const double& errorMargin = 0.0001f)
+	{
+		return abs(a - b) <= errorMargin;
+	}
+
 	class IrisLibTest : public ::testing::Test {
 	protected:
 		Configuration configuration; 

@@ -34,7 +34,7 @@ namespace iris::Tests
 
 		relativeLuminance.SetCurrentFrame(imagesRgb);
 		cv::Mat* luminance = relativeLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
+		double testLum = luminance->at<double>(0, 0);
 		EXPECT_EQ(1, testLum);
 
 		imagesRgb.Release();
@@ -51,7 +51,7 @@ namespace iris::Tests
 
 		relativeLuminance.SetCurrentFrame(imagesRgb);
 		cv::Mat* luminance = relativeLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
+		double testLum = luminance->at<double>(0, 0);
 		EXPECT_EQ(0, testLum);
 
 		imagesRgb.Release();
@@ -68,9 +68,9 @@ namespace iris::Tests
 
 		relativeLuminance.SetCurrentFrame(imagesRgb);
 		cv::Mat* luminance = relativeLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
+		double testLum = luminance->at<double>(0, 0);
 		testLum = RelativeLuminance::roundoff(testLum, 3);
-		EXPECT_EQ(0.216f, testLum);
+		EXPECT_EQ(0.216, testLum);
 		
 		imagesRgb.Release();
 	}
@@ -86,9 +86,9 @@ namespace iris::Tests
 
 		relativeLuminance.SetCurrentFrame(imagesRgb);
 		cv::Mat* luminance = relativeLuminance.getCurrentFrame();
-		float testLum = luminance->at<float>(0, 0);
+		double testLum = luminance->at<double>(0, 0);
 		testLum = RelativeLuminance::roundoff(testLum, 3);
-		EXPECT_EQ(0.072f, testLum);
+		EXPECT_EQ(0.072, testLum);
 
 		imagesRgb.Release();
 	}
@@ -107,7 +107,7 @@ namespace iris::Tests
 		relativeLuminance.SetCurrentFrame(pImagesBlackRgb);
 		relativeLuminance.SetCurrentFrame(pImageWhitesRgb);
 		cv::Mat* diff = relativeLuminance.FrameDifference();
-		float testLum = diff->at<float>(0, 0);
+		double testLum = diff->at<double>(0, 0);
 		EXPECT_EQ(1, testLum);
 
 		delete diff;
@@ -129,7 +129,7 @@ namespace iris::Tests
 		relativeLuminance.SetCurrentFrame(pImageWhitesRgb);
 		relativeLuminance.SetCurrentFrame(pImagesBlackRgb);
 		cv::Mat* diff = relativeLuminance.FrameDifference();
-		float testLum = diff->at<float>(0, 0);
+		double testLum = diff->at<double>(0, 0);
 		EXPECT_EQ(-1, testLum);
 
 		delete diff;
@@ -152,7 +152,7 @@ namespace iris::Tests
 		relativeLuminance.SetCurrentFrame(pImagesBlackRgb);
 		relativeLuminance.SetCurrentFrame(pImagesBlackRgb);
 		cv::Mat* diff = relativeLuminance.FrameDifference();
-		float testLum = diff->at<float>(0, 0);
+		double testLum = diff->at<double>(0, 0);
 		EXPECT_EQ(0, testLum);
 
 		delete diff;
@@ -163,138 +163,138 @@ namespace iris::Tests
 	TEST_F(RelativeLuminanceTest,CheckTransition_WhenFalse_From_value_to_zero_Test)
 	{
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.02f;
+		double testLastAvg = 0.02;
 
 		//SameSign (positive) 0 case && !newTransition
 		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(0.02f, transitionResult.lastAvgDiffAcc);
+		EXPECT_EQ(0.02, transitionResult.lastAvgDiffAcc);
 	}
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_value_to_value_Test)
 	{
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.02f;
+		double testLastAvg = 0.02;
 
 		//SameSign (positive) 0 case && !newTransition
 		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.05f, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(0.07f, transitionResult.lastAvgDiffAcc);
+		EXPECT_TRUE(CompareDouble(0.07, transitionResult.lastAvgDiffAcc));
 	}
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_value_to_value_Test)
 	{
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.07f;
+		double testLastAvg = 0.07;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.03f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.03, testLastAvg);
 
 		EXPECT_TRUE(transitionResult.checkResult);
-		EXPECT_EQ(0.1f, transitionResult.lastAvgDiffAcc);
+		EXPECT_TRUE(CompareDouble(0.1, transitionResult.lastAvgDiffAcc));
 	}
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_threshold_value_to_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_threshold_value_to_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.1f;
+		double testLastAvg = 0.1;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.1f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.1, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(0.2f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_TRUE(CompareDouble(0.2, transitionResult.lastAvgDiffAcc));
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_value_to_negative_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_value_to_negative_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.2f;
+		double testLastAvg = 0.2;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.1, testLastAvg);
 
 		EXPECT_TRUE(transitionResult.checkResult);
-		EXPECT_EQ(-0.1f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_TRUE(CompareDouble(- 0.1, transitionResult.lastAvgDiffAcc));
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = -0.1f;
+		double testLastAvg = -0.1;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.1f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0.1, testLastAvg);
 
 		EXPECT_TRUE(transitionResult.checkResult);
-		EXPECT_EQ(0.1f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_TRUE(CompareDouble(0.1, transitionResult.lastAvgDiffAcc));
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_value_to_negative_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_value_to_negative_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0.1f;
+		double testLastAvg = 0.1;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.05f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.05, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(-0.05f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_EQ(-0.05, transitionResult.lastAvgDiffAcc);
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_value_to_zero_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_value_to_zero_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = -0.05f;
+		double testLastAvg = -0.05;
 
 		//SameSign (positive) 0 case && !newTransition
 		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(0, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(-0.05f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_EQ(-0.05, transitionResult.lastAvgDiffAcc);
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_negative_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_negative_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = -0.05f;
+		double testLastAvg = -0.05;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.06f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.06, testLastAvg);
 
 		EXPECT_TRUE(transitionResult.checkResult);
-		EXPECT_EQ(-0.11f, transitionResult.lastAvgDiffAcc);
-	}
+		EXPECT_EQ(-0.11, transitionResult.lastAvgDiffAcc);
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_threshold_value_to_negative_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_threshold_value_to_negative_value_Test)
+    {
 		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = -0.11f;
+		double testLastAvg = -0.11;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.1, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(-0.21f, Flash::roundoff(transitionResult.lastAvgDiffAcc, 2));
-	}
+		EXPECT_EQ(-0.21, Flash::roundoff(transitionResult.lastAvgDiffAcc, 2));
+    }
 
-	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_zero_to_negative_threshold_value_to_negative_threshold_value_Test)
-	{
+    TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_zero_to_negative_threshold_value_to_negative_threshold_value_Test)
+    {
 		RelativeLuminance relativeLuminance(2, cv::Size(), configuration.GetLuminanceFlashParams());
-		float testLastAvg = 0;
+		double testLastAvg = 0;
 
 		//SameSign (positive) 0 case && !newTransition
-		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.11f, testLastAvg);
+		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.11, testLastAvg);
 		testLastAvg = transitionResult.lastAvgDiffAcc;
-		transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
+		transitionResult = relativeLuminance.CheckTransition(-0.1, testLastAvg);
 		testLastAvg = transitionResult.lastAvgDiffAcc;
-		transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
+		transitionResult = relativeLuminance.CheckTransition(-0.1, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
-		EXPECT_EQ(-0.2f, Flash::roundoff(transitionResult.lastAvgDiffAcc, 2));
-	}
+		EXPECT_EQ(-0.2, Flash::roundoff(transitionResult.lastAvgDiffAcc, 2));
+    }
 
 	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenWhite_Test)
 	{
@@ -304,39 +304,39 @@ namespace iris::Tests
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
 
 		relativeLuminance.SetCurrentFrame(pImageWhitesRgb);
-		float avgLum = relativeLuminance.FrameMean();
+		double avgLum = relativeLuminance.FrameMean();
 		EXPECT_EQ(1, avgLum);
 		
 		pImageWhitesRgb.Release();
 	}
 
-	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenGray_Test)
-	{
-		RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
-		cv::Mat imageWhiteBgr(1280, 720, CV_8UC3, gray);
-		IrisFrame pImageWhitesRgb;
-		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
+    TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenGray_Test)
+    {
+        RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
+        cv::Mat imageWhiteBgr(1280, 720, CV_8UC3, gray);
+        IrisFrame pImageWhitesRgb;
+        pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
 
-		relativeLuminance.SetCurrentFrame(pImageWhitesRgb);
-		float avgLum = relativeLuminance.roundoff(relativeLuminance.FrameMean(), 2);
-		EXPECT_EQ(0.22f, avgLum);
+        relativeLuminance.SetCurrentFrame(pImageWhitesRgb);
+        double avgLum = relativeLuminance.roundoff(relativeLuminance.FrameMean(), 2);
+        EXPECT_EQ(0.22, avgLum);
 
-		pImageWhitesRgb.Release();
-	}
+        pImageWhitesRgb.Release();
+    }
 
-	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenRealFrame_Test)
-	{
-		RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
-		cv::Mat frameBgr = cv::imread("data/TestImages/frames/FrameForTest.jpg");
-		IrisFrame pFramesRgb;
-		pFramesRgb.sRgbFrame = frameRgbConverter->Convert(frameBgr);
+    TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenRealFrame_Test)
+    {
+        RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
+        cv::Mat frameBgr = cv::imread("data/TestImages/frames/FrameForTest.jpg");
+        IrisFrame pFramesRgb;
+        pFramesRgb.sRgbFrame = frameRgbConverter->Convert(frameBgr);
 
-		relativeLuminance.SetCurrentFrame(pFramesRgb);
-		float avgLum = relativeLuminance.roundoff(relativeLuminance.FrameMean(), 2);
-		EXPECT_EQ(0.33f, avgLum);
+        relativeLuminance.SetCurrentFrame(pFramesRgb);
+        double avgLum = relativeLuminance.roundoff(relativeLuminance.FrameMean(), 2);
+        EXPECT_EQ(0.33, avgLum);
 
-		pFramesRgb.Release();
-	}
+        pFramesRgb.Release();
+    }
 
 	TEST_F(RelativeLuminanceTest, SafeArea_No_Change_Threshold)
 	{
@@ -350,10 +350,10 @@ namespace iris::Tests
 		luminance.SetCurrentFrame(imageSbgr);
 
 		cv::Mat* frameDiff = luminance.FrameDifference();
-		float avgDifference = luminance.CheckSafeArea(frameDiff);
+		double avgDifference = luminance.CheckSafeArea(frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = luminance.GetFlashArea();
+		double flashAreaProportion = luminance.GetFlashArea();
 		EXPECT_EQ(0, flashAreaProportion);
 
 		delete imageSbgr;
@@ -364,7 +364,7 @@ namespace iris::Tests
 	{
 		cv::Size size(5, 5);
 
-		float frameDiffArray[5][5] = {
+		double frameDiffArray[5][5] = {
 				{ 200, 200, 200, 0, 0 },
 				{ 200, 200, 0, 0, 0 },
 				{ 0, 0, 0, 0, 0 },
@@ -383,11 +383,11 @@ namespace iris::Tests
 		cv::Mat* imageSbgr2 = frameRgbConverter->Convert(imageBgr2);
 		luminance.SetCurrentFrame(imageSbgr2);
 
-		float avgDifference = luminance.CheckSafeArea(&frameDiff);
+		double avgDifference = luminance.CheckSafeArea(&frameDiff);
 		EXPECT_EQ(0, avgDifference);
 
-		float flashAreaProportion = luminance.GetFlashArea();
-		EXPECT_TRUE(CompareFloat(0.2, flashAreaProportion));
+		double flashAreaProportion = luminance.GetFlashArea();
+		EXPECT_TRUE(CompareDouble(0.2, flashAreaProportion));
 
 		delete imageSbgr;
 		delete imageSbgr2;
@@ -407,10 +407,10 @@ namespace iris::Tests
 		luminance.SetCurrentFrame(imageSbgr2);
 
 		cv::Mat* frameDiff = luminance.FrameDifference();
-		float avgDifference = luminance.CheckSafeArea(frameDiff);
-		EXPECT_TRUE(CompareFloat(0.9278, avgDifference));
+		double avgDifference = luminance.CheckSafeArea(frameDiff);
+		EXPECT_TRUE(CompareDouble(0.9278, avgDifference));
 
-		float flashAreaProportion = luminance.GetFlashArea();
+		double flashAreaProportion = luminance.GetFlashArea();
 		EXPECT_EQ(1, flashAreaProportion);
 
 		delete imageSbgr;

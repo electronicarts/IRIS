@@ -31,7 +31,7 @@ namespace iris
 		struct CheckTransitionResult
 		{
 			bool checkResult = false;
-			float lastAvgDiffAcc = 0;
+			double lastAvgDiffAcc = 0;
 
 			void operator = (const CheckTransitionResult& data)
 			{
@@ -61,7 +61,7 @@ namespace iris
 		/// </summary>
 		/// <param name="frameDifference">difference of flash values as frame(n) - frame(n-1)</param>
 		/// <returns>average frame difference</returns>
-		float CheckSafeArea(cv::Mat* frameDifference);
+		double CheckSafeArea(cv::Mat* frameDifference);
 
 		/// <summary>
 		/// Accumulates the average difference and returns true if a new transition is detected
@@ -69,16 +69,16 @@ namespace iris
 		/// <param name="avgDiff">average difference of last two frames</param>
 		/// <param name="lastAvgDiffAcc">accumulated average difference</param>
 		/// <returns></returns>
-		CheckTransitionResult CheckTransition(float avgDiff, float lastAvgDiffAcc);
+		CheckTransitionResult CheckTransition(double avgDiff, double lastAvgDiffAcc);
 
 		/// <summary>
 		/// Calculates the average frame luminance
 		/// </summary>
 		/// <returns>average frame</returns>
-		float FrameMean();
-		inline float GetFrameMean() { return m_avgCurrentFrame; }
+		double FrameMean();
+		inline double GetFrameMean() { return m_avgCurrentFrame; }
 
-		float GetFlashArea() { return m_flashArea;  }
+		double GetFlashArea() { return m_flashArea;  }
 
 
 		cv::Mat* getCurrentFrame() {
@@ -91,7 +91,7 @@ namespace iris
 		/// <param name="value"></param>
 		/// <param name="prec"></param>
 		/// <returns></returns>
-		static float roundoff(float value, unsigned char prec);
+		static double roundoff(double value, unsigned char prec);
 
 		/// <summary>
 		/// Calculates sRGB values in the log file to later
@@ -111,7 +111,7 @@ namespace iris
 		/// </summary>
 		/// <param name="lastAvgDiffAcc">last accumulated average difference</param>
 		/// <param name="avgDiffAcc">new accumulated average difference</param>
-		bool IsFlashTransition(const float& lastAvgDiffAcc, const float& avgDiffAcc, const float& threshold);
+		bool IsFlashTransition(const double& lastAvgDiffAcc, const double& avgDiffAcc, const double& threshold);
 
 		cv::Mat* lastFrame = nullptr;
 		cv::Mat* currentFrame = nullptr;
@@ -120,18 +120,18 @@ namespace iris
 		
 		/// Returns true if both numbers are positive or negative
 		/// 0 is both positive and negative as it means flash trend has not changed
-		inline bool SameSign(float num1, float num2)
+		inline bool SameSign(double num1, double num2)
 		{
 			return (num1 <= 0 && num2 <= 0) || (num1 >= 0 && num2 >= 0);
 		}
 
 		FlashParams* m_params;
-		std::vector<float> m_avgDiffInSecond; //all avg diff values in the current second (by increase or decrease)
+		std::vector<double> m_avgDiffInSecond; //all avg diff values in the current second (by increase or decrease)
 		int m_safeArea = 0; //area size in pixels that, if surpassed, indicates a transition may have occurred  
 		static short fps;
 
-		float m_avgCurrentFrame = 0;
-		float m_avgLastFrame = 0;
+		double m_avgCurrentFrame = 0;
+		double m_avgLastFrame = 0;
 		float m_flashArea = 0;
 		int m_frameSize = 0; //frame width * frame height
 	};

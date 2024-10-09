@@ -10,19 +10,19 @@ namespace iris
 
 	struct FlashParams
 	{
-		FlashParams(float flashThresh, float areaP, float darkThresh) : flashThreshold(flashThresh), areaProportion(areaP), darkThreshold(darkThresh) {};
+		FlashParams(double flashThresh, double areaP, double darkThresh) : flashThreshold(flashThresh), areaProportion(areaP), darkThreshold(darkThresh) {};
 		
 		//threshold of Red Saturation or Luminace 
-		float flashThreshold; //if flash values overpass threshold, a transition has occurred
-		float areaProportion; //minimum area of the screen display for a transition to have occurred
-		float darkThreshold; //if darker image is above this threshold, a transitions has not occurred
+		double flashThreshold; //if flash values overpass threshold, a transition has occurred
+		double areaProportion; //minimum area of the screen display for a transition to have occurred
+		double darkThreshold; //if darker image is above this threshold, a transitions has not occurred
 	};
 
 	struct FrameRgbConverterParams
 	{
-		FrameRgbConverterParams(std::vector<float> sRgbValues) : sRgbValues(sRgbValues) {};
+		FrameRgbConverterParams(std::vector<double> sRgbValues) : sRgbValues(sRgbValues) {};
 
-		std::vector<float> sRgbValues; //The input array containing the decimal values for the sRgb convertion
+		std::vector<double> sRgbValues; //The input array containing the decimal values for the sRgb convertion
 	};
 
 	struct TransitionTrackerParams

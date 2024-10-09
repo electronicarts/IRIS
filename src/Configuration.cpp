@@ -68,33 +68,33 @@ namespace iris
 		if (m_luminanceType == LuminanceType::CD)
 		{ 
 			m_luminanceFlashParams = new FlashParams(
-				jsonFile.GetParam<float>("Luminance", "CdLuminanceFlashThreshold"), 
-				jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
-				jsonFile.GetParam<float>("Luminance", "CdDarkLuminanceThreshold"));
+				jsonFile.GetParam<double>("Luminance", "CdLuminanceFlashThreshold"), 
+				jsonFile.GetParam<double>("FlashDetection", "AreaProportion"), 
+				jsonFile.GetParam<double>("Luminance", "CdDarkLuminanceThreshold"));
 		}
 		else 
 		{ 
 			m_luminanceFlashParams = new FlashParams(
-				jsonFile.GetParam<float>("Luminance", "RelativeLuminanceFlashThreshold"), 
-				jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
-				jsonFile.GetParam<float>("Luminance", "RelativeDarkLuminanceThreshold"));
+				jsonFile.GetParam<double>("Luminance", "RelativeLuminanceFlashThreshold"), 
+				jsonFile.GetParam<double>("FlashDetection", "AreaProportion"), 
+				jsonFile.GetParam<double>("Luminance", "RelativeDarkLuminanceThreshold"));
 		}
 		
 		//Red Saturation
 		m_redSaturationFlashParams = new FlashParams(
-			jsonFile.GetParam<float>("RedSaturation", "FlashThreshold"), 
-			jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
-			jsonFile.GetParam<float>("RedSaturation", "RedDarkThreshold"));
+			jsonFile.GetParam<double>("RedSaturation", "FlashThreshold"), 
+			jsonFile.GetParam<double>("FlashDetection", "AreaProportion"), 
+			jsonFile.GetParam<double>("RedSaturation", "RedDarkThreshold"));
 		
 		//FrameRgbConverter Params 
 		m_frameSrgbConverterParams = new EA::EACC::Utils::FrameConverterParams(
-			jsonFile.GetVector<float>("FlashDetection", "sRGBValues"));
+			jsonFile.GetVector<double>("FlashDetection", "sRGBValues"));
 
 		//FrameRgbConverter Params for CD Luminance conversion
 		if (m_luminanceType == LuminanceType::CD)
 		{
 			m_frameCDLuminanceConverterParams = new EA::EACC::Utils::FrameConverterParams(
-				jsonFile.GetVector<float>("Luminance", "CdLuminanceValues"));
+				jsonFile.GetVector<double>("Luminance", "CdLuminanceValues"));
 		}
 
 		//Transition Tracker Params
@@ -107,15 +107,15 @@ namespace iris
 
 		//Pattern Detection
 		int minStripes = jsonFile.GetParam<int>("PatternDetection", "MinStripes");
-		float darkLumThreshold = 0.0f;
+		double darkLumThreshold = 0.0f;
 		
 		if (m_luminanceType == LuminanceType::CD)
 		{ 
-			darkLumThreshold = jsonFile.GetParam<float>("PatternDetection", "CDDarkLuminanceThreshold"); 
+			darkLumThreshold = jsonFile.GetParam<double>("PatternDetection", "CDDarkLuminanceThreshold"); 
 		}
 		else 
 		{ 
-			darkLumThreshold = jsonFile.GetParam<float>("PatternDetection", "RelativeDarkLuminanceThreshold"); 
+			darkLumThreshold = jsonFile.GetParam<double>("PatternDetection", "RelativeDarkLuminanceThreshold"); 
 		}
 
 		m_patternDetectionParams = new PatternDetectionParams(
