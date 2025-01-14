@@ -3,7 +3,7 @@
 #pragma once
 #include <string>
 #include <math.h>       /* fmod */
-#include "utils/JsonWrapper"
+#include "utils/JsonWrapper.h"
 #include "iris/TotalFlashIncidents.h"
 
 namespace iris
@@ -28,6 +28,7 @@ namespace iris
 		FrameData() {};
 		FrameData(unsigned int frame, unsigned long timeMs) : Frame(frame)
 		{
+			TimeStampVal = timeMs;
 			TimeStampMs = msToTimeSpan(timeMs);
 		};
 
@@ -132,6 +133,7 @@ namespace iris
 		std::string  patternArea = "0.00%";
 		int patternDetectedLines = 0;
 		PatternResult patternFrameResult = PatternResult::Pass;
+		unsigned long TimeStampVal = 0;
 	};
 
 	//Serializes FrameData to Json object

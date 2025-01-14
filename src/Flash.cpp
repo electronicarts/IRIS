@@ -12,19 +12,23 @@ Abstract class for Flash detection
 #include <limits>
 #include <math.h>
 #include "iris/Log.h"
+#include "IFrameManager.h"
 
 namespace iris
 {
     short Flash::fps = 0;
 
-    Flash::Flash(short fps, const cv::Size& frameSize, FlashParams* flashParams)
+	Flash::Flash(short fps, const cv::Size& frameSize, FlashParams* flashParams, IFrameManager* frameManager) : m_frameManager(frameManager)
     {
         Flash::fps = fps;
+
         m_params = flashParams;
         m_avgDiffInSecond.reserve(fps);
         m_avgDiffInSecond.emplace_back(0); //initial frame
         m_frameSize = frameSize.area();
         m_safeArea = frameSize.area() * m_params->areaProportion;
+
+        m_managerIndx = m_frameManager->RegisterManager(fps, TIME_WINDOW);
 
         LOG_CORE_INFO("Flash Area in pixels: {0}", m_safeArea);
         LOG_CORE_INFO("Number of pixels in frame: {0}", frameSize.area());
@@ -111,10 +115,12 @@ namespace iris
 
         if (SameSign(lastAvgDiffAcc, avgDiff))  //accumulate increase/decrease (positive/negative)
         {
-            if (m_avgDiffInSecond.size() == m_avgDiffInSecond.capacity())
+			int removeExcess = m_frameManager->GetFramesToRemove(m_managerIndx);
+            while(removeExcess>0)
             {
                 lastAvgDiffAcc -= m_avgDiffInSecond[0];
                 m_avgDiffInSecond.erase(m_avgDiffInSecond.begin());
+                removeExcess--;
             }
 
             m_avgDiffInSecond.emplace_back(avgDiff);
@@ -122,10 +128,11 @@ namespace iris
         }
         else
         {
+            m_frameManager->ResetManager(m_managerIndx);
             m_avgDiffInSecond.clear();
             m_avgDiffInSecond.emplace_back(avgDiff);
         }
-
+        
         result.checkResult = IsFlashTransition(result.lastAvgDiffAcc, avgDiff, m_params->flashThreshold);
         result.lastAvgDiffAcc = avgDiff; //new start acc value
 

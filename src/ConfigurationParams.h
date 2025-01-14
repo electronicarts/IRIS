@@ -27,14 +27,14 @@ namespace iris
 
 	struct TransitionTrackerParams
 	{
-		TransitionTrackerParams(uint maxTransition, uint minTransitions, uint extendedFailSeconds, uint extendedFailWindow, bool analyseByTime)
-		: maxTransitions(maxTransition), minTransitions(minTransitions), extendedFailSeconds(extendedFailSeconds), extendedFailWindow (extendedFailWindow), analyseByTime(analyseByTime) {};
+		TransitionTrackerParams(uint maxTransition, uint minTransitions, uint extendedFailSeconds, uint extendedFailWindow, uint warningTransitions)
+		: maxTransitions(maxTransition), minTransitions(minTransitions), extendedFailSeconds(extendedFailSeconds), extendedFailWindow (extendedFailWindow), warningTransitions(warningTransitions) {};
 
 		uint maxTransitions; //max allowed transitions and max transitions to count for extended fail
 		uint minTransitions; //amount of min transitions to add to extended fail count
 		uint extendedFailSeconds; //if extendedFailFramesIS reach this value, extended failure has occured
 		uint extendedFailWindow; //seconds in extended fail count window
-		bool analyseByTime; //realise the flash analysis by time instead of FPS
+		uint warningTransitions = 4;//minimum number of transitions to trigger a warning
 	};
 
 	struct PatternDetectionParams

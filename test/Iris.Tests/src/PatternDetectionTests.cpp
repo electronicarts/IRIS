@@ -7,67 +7,119 @@
 #include "IrisFrame.h"
 #include "utils/FrameConverter.h"
 #include "iris/TotalFlashIncidents.h"
+#include "FpsFrameManager.h"
+#include "TimeFrameManager.h"
 
 namespace iris::Tests
 {
-	class PatternDetectionTests : public IrisLibTest {
-	protected:
-		EA::EACC::Utils::FrameConverter* frameRgbConverter = nullptr;
-		void SetUp() override {
-			configuration.SetLuminanceType(Configuration::LuminanceType::RELATIVE);
-			IrisLibTest::SetUp();
+class PatternDetectionTests : public IrisLibTest 
+{
+protected:
+	EA::EACC::Utils::FrameConverter* frameRgbConverter = nullptr;
 
-			frameRgbConverter = new EA::EACC::Utils::FrameConverter(configuration.GetFrameSrgbConverterParams());
-		}
-
-		~PatternDetectionTests()
-		{
-			if (frameRgbConverter != nullptr)
-			{
-				delete frameRgbConverter;
-			}
-		}
-	};
-
-	TEST_F(PatternDetectionTests, NoPattern_Pass)
+	void SetUp() override 
 	{
-		cv::Mat image = cv::imread("data/TestImages/Patterns/shapes.png");
-		IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
+		IrisLibTest::SetUp();
 
-		FlashDetection flashDetection(&configuration, 0, image.size());
-		PatternDetection patternDetection(&configuration, 5, image.size());
-		flashDetection.setLuminance(irisFrame);
-
-		FrameData data;
-		for (int i = 0; i < 5; i++)
-		{
-			patternDetection.checkFrame(irisFrame, i, data);
-		}
-
-		EXPECT_EQ(PatternResult::Pass, data.patternFrameResult);
-
-		irisFrame.Release();
+		frameRgbConverter = new EA::EACC::Utils::FrameConverter(configuration.GetFrameSrgbConverterParams());
 	}
 
-
-	TEST_F(PatternDetectionTests, Straight_Lines_Fail)
+	~PatternDetectionTests()
 	{
-		cv::Mat image = cv::imread("data/TestImages/Patterns/20stripes.png");
-		IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
-
-		FlashDetection flashDetection(&configuration, 0, image.size());
-		PatternDetection patternDetection(&configuration, 5, image.size());
-		flashDetection.setLuminance(irisFrame);
-
-		FrameData data;
-		for (int i = 0; i < 5; i++)
-		{
-			patternDetection.checkFrame(irisFrame, i, data);
-		}
-
-		EXPECT_EQ(PatternResult::Fail, data.patternFrameResult);
-
-		irisFrame.Release();
+		delete frameRgbConverter;
 	}
+};
+
+TEST_F(PatternDetectionTests, NoPattern_Pass)
+{
+	cv::Mat image = cv::imread("data/TestImages/Patterns/shapes.png");
+	IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
+	FpsFrameManager frameManager{};
+
+	FlashDetection flashDetection(&configuration, 0, image.size(), &frameManager);
+	PatternDetection patternDetection(&configuration, 5, image.size(), &frameManager);
+	flashDetection.setLuminance(irisFrame);
+
+	FrameData data;
+	for (int i = 0; i < 5; i++)
+	{
+		frameManager.AddFrame(data);
+		patternDetection.checkFrame(irisFrame, i, data);
+	}
+
+	EXPECT_EQ(PatternResult::Pass, data.patternFrameResult);
+
+	irisFrame.Release();
+}
+
+
+TEST_F(PatternDetectionTests, Straight_Lines_Fail)
+{
+	cv::Mat image = cv::imread("data/TestImages/Patterns/20stripes.png");
+	IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
+	FpsFrameManager frameManager{};
+	
+	FlashDetection flashDetection(&configuration, 0, image.size(), &frameManager);
+	PatternDetection patternDetection(&configuration, 5, image.size(), &frameManager);
+	flashDetection.setLuminance(irisFrame);
+
+	FrameData data;
+	for (int i = 0; i < 5; i++)
+	{
+		frameManager.AddFrame(data);
+		patternDetection.checkFrame(irisFrame, i, data);
+	}
+
+	EXPECT_EQ(PatternResult::Fail, data.patternFrameResult);
+
+	irisFrame.Release();
+}
+
+TEST_F(PatternDetectionTests, RealTime_NoPattern_Pass)
+{
+	cv::Mat image = cv::imread("data/TestImages/Patterns/shapes.png");
+	IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
+	TimeFrameManager frameManager{};
+
+	FlashDetection flashDetection(&configuration, 0, image.size(), &frameManager);
+	PatternDetection patternDetection(&configuration, 5, image.size(), &frameManager);
+	flashDetection.setLuminance(irisFrame);
+
+	FrameData data;
+	for (int i = 0; i < 5; i++)
+	{
+		frameManager.AddFrame(data);
+		patternDetection.checkFrame(irisFrame, i, data);
+		data.TimeStampVal += 250;
+	}
+
+	EXPECT_EQ(PatternResult::Pass, data.patternFrameResult);
+
+	irisFrame.Release();
+}
+
+
+TEST_F(PatternDetectionTests, RealTime_Straight_Lines_Fail)
+{
+	cv::Mat image = cv::imread("data/TestImages/Patterns/20stripes.png");
+	IrisFrame irisFrame(&image, frameRgbConverter->Convert(image), FrameData());
+	TimeFrameManager frameManager{};
+
+	FlashDetection flashDetection(&configuration, 0, image.size(), &frameManager);
+	PatternDetection patternDetection(&configuration, 5, image.size(), &frameManager);
+	flashDetection.setLuminance(irisFrame);
+
+	FrameData data;
+	for (int i = 0; i < 5; i++)
+	{
+		frameManager.AddFrame(data);
+		patternDetection.checkFrame(irisFrame, i, data);
+		data.TimeStampVal += 250;
+	}
+
+	EXPECT_EQ(PatternResult::Fail, data.patternFrameResult);
+
+	irisFrame.Release();
+}
 
 }

@@ -18,6 +18,8 @@
 #include <string>
 #include "utils/JsonWrapper.h"
 #include <opencv2/imgproc.hpp>
+#include "FpsFrameManager.h"
+#include "TimeFrameManager.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -42,8 +44,10 @@ namespace iris
 	{
 	}
 
-	void VideoAnalyser::Init(const std::string& videoName, bool flagJson)
+	void VideoAnalyser::Init(const std::string& videoPath, bool flagJson)
 	{
+		m_frameManager = new FpsFrameManager();
+
 		if (m_configuration->FrameResizeEnabled())
 		{
 			float resizedFrameProportion;
@@ -51,29 +55,40 @@ namespace iris
 			LOG_CORE_INFO("Resizing frames at: {0}%", resizedFrameProportion * 100);
 			m_videoInfo.frameSize = cv::Size(m_videoInfo.frameSize.width * resizedFrameProportion, m_videoInfo.frameSize.height * resizedFrameProportion);
 		}
-
-		m_flashDetection = new FlashDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize);
+		
+		m_flashDetection = new FlashDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize, m_frameManager);
 		m_photosensitivityDetector.push_back(m_flashDetection);
 		m_frameSrgbConverter = new EA::EACC::Utils::FrameConverter(m_configuration->GetFrameSrgbConverterParams());
-		m_patternDetection = new PatternDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize);
+		m_patternDetection = new PatternDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize, m_frameManager);
 
 		if (m_configuration->PatternDetectionEnabled())
 		{
 			m_photosensitivityDetector.push_back(m_patternDetection);
 		}
+		std::string videoFileName;
+		if (std::filesystem::exists(videoPath)) 
+		{
+			videoFileName = std::filesystem::path{ videoPath }.filename().string();
+		}
+		else 
+		{ 	//Video is not a file, it's a URL
+			int indexBegin = videoPath.find_last_of("/");
+			int indexEnd = videoPath.find_last_of(".");
+			assert(indexBegin != videoFileName.npos);
+			assert(indexEnd   != videoFileName.npos);
 
-		std::string frameDataFile = m_configuration->GetResultsPath() + videoName + "/framedata.csv";
-		Log::SetDataLoggerFile(frameDataFile.c_str());
+			videoFileName = videoPath.substr(indexBegin,indexEnd-indexBegin);
+		}
+
+		m_frameDataPath = m_configuration->GetResultsPath() + videoFileName + "/framedata.csv";
+		Log::SetDataLoggerFile(m_frameDataPath.c_str());
 
 		if (flagJson)
 		{
-			m_resultJsonPath = m_configuration->GetResultsPath() + videoName + "/" + "result" + ".json";
-			m_frameDataJsonPath = m_configuration->GetResultsPath() + videoName + "/" + "frameData" + ".json";
+			m_resultJsonPath = m_configuration->GetResultsPath() + videoFileName + "/result.json";
+			m_frameDataJsonPath = m_configuration->GetResultsPath() + videoFileName + "/frameData.json";
 		}
 
-		const char* luminanceType = m_configuration->GetLuminanceType() == Configuration::LuminanceType::CD ? "CD" : "RELATIVE";
-		LOG_CORE_INFO("Luminance Type: {0}", luminanceType);
-		
 		LOG_CORE_INFO("Pattern Detection: {0}", m_configuration->PatternDetectionEnabled());
 
 		LOG_CORE_INFO("Frame Resize: {0}", m_configuration->FrameResizeEnabled());
@@ -81,6 +96,34 @@ namespace iris
 		LOG_CORE_INFO("Safe Area Proportion: {0}", m_configuration->GetSafeAreaProportion());
 
 		LOG_CORE_INFO("Write json file: {0}", flagJson);
+	}
+
+	void VideoAnalyser::RealTimeInit(cv::Size& frameSize)
+	{
+		m_frameManager = new TimeFrameManager();
+
+		//Default SetUp for Real time use
+		m_videoInfo.fps = 60;
+		m_videoInfo.frameCount = -1;
+		m_videoInfo.duration = -1;
+		m_videoInfo.frameSize = frameSize;
+		
+		if (m_configuration->FrameResizeEnabled())
+		{
+			float resizedFrameProportion;
+			resizedFrameProportion = m_configuration->GetFrameResizeProportion();
+			LOG_CORE_INFO("Resizing frames at: {0}%", resizedFrameProportion * 100);
+			m_videoInfo.frameSize = cv::Size(m_videoInfo.frameSize.width * resizedFrameProportion, m_videoInfo.frameSize.height * resizedFrameProportion);
+		}
+		m_flashDetection = new FlashDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize, m_frameManager);
+		m_photosensitivityDetector.push_back(m_flashDetection);
+		m_frameSrgbConverter = new EA::EACC::Utils::FrameConverter(m_configuration->GetFrameSrgbConverterParams());
+		m_patternDetection = new PatternDetection(m_configuration, m_videoInfo.fps, m_videoInfo.frameSize, m_frameManager);
+
+		if (m_configuration->PatternDetectionEnabled())
+		{
+			m_photosensitivityDetector.push_back(m_patternDetection);
+		}
 	}
 
 	void VideoAnalyser::DeInit()
@@ -97,18 +140,21 @@ namespace iris
 		{
 			delete m_frameSrgbConverter; m_frameSrgbConverter = nullptr;
 		}
-
+		if (m_frameManager != nullptr)
+		{
+			delete m_frameManager; m_frameManager = nullptr;
+		}
 		m_photosensitivityDetector.clear();
 	}
 
 	void VideoAnalyser::AnalyseVideo(bool flagJson, const char* sourceVideo)
 	{
 		cv::VideoCapture video(sourceVideo);
-		std::string videoName = std::filesystem::path(sourceVideo).filename().string();
+		std::string videoPath(sourceVideo);
 
-		if (VideoIsOpen(sourceVideo, video, videoName.c_str()))
+		if (VideoIsOpen(sourceVideo, video))
 		{
-			Init(videoName, flagJson);
+			Init(videoPath, flagJson);
 			SetOptimalCvThreads(m_videoInfo.frameSize);
 			cv::Mat frame;
 			video.read(frame);
@@ -146,6 +192,8 @@ namespace iris
 
 				LOG_DATA_INFO(data.ToCSV());
 
+				FLUSH_DATA_LOGGER();
+
 				if (flagJson)
 				{
 					lineGraphData.push_back_lineGraphData(data);
@@ -162,20 +210,26 @@ namespace iris
 			unsigned int elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			LOG_CORE_INFO("Elapsed time: {0} ms", elapsedTime);
 
+			Result result;
+			m_flashDetection->setResult(result);
+
+			if (m_patternDetection != nullptr) { m_patternDetection->setResult(result); }
+
 			if (m_flashDetection->isFail() || m_patternDetection->isFail())
 			{
-				LOG_CORE_INFO("Video Result: FAIL");
+				LOG_CORE_CRITICAL("Video Overall Result: FAIL");
+			}
+			else if (m_flashDetection->isWarning())
+			{
+				LOG_CORE_WARNING("Video Overall Result: PASS WITH WARNING");
 			}
 			else
 			{
-				LOG_CORE_INFO("Video Result: PASS");
+				LOG_CORE_INFO("Video Overall Result: PASS");
 			}
 
 			if (flagJson)
-			{
-				Result result;
-				m_flashDetection->setResult(result);
-				if (m_patternDetection != nullptr) { m_patternDetection->setResult(result); }
+			{	
 				result.VideoLen = m_videoInfo.duration * 1000;
 				result.AnalysisTime = elapsedTime;
 				result.TotalFrame = m_videoInfo.frameCount;
@@ -191,6 +245,8 @@ namespace iris
 	void VideoAnalyser::AnalyseFrame(cv::Mat& frame, unsigned int& frameIndex, FrameData& data)
 	{
 		IrisFrame irisFrame(&(frame), m_frameSrgbConverter->Convert(frame), data);
+
+		m_frameManager->AddFrame(data);
 
 		m_flashDetection->setLuminance(irisFrame);
 		for (auto detector : m_photosensitivityDetector)
@@ -227,7 +283,7 @@ namespace iris
 		LOG_CORE_INFO("Number of threads used: {0}", threads_used);
 	}
 
-	bool VideoAnalyser::VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video, const char* videoName)
+	bool VideoAnalyser::VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video)
 	{
 		if (video.isOpened())
 		{
@@ -242,7 +298,7 @@ namespace iris
 			m_videoInfo.frameSize = cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT));
 			m_videoInfo.duration = m_videoInfo.frameCount / (float)m_videoInfo.fps;
 
-			LOG_CORE_INFO("Video: {0} opened successful", videoName);
+			LOG_CORE_INFO("Video: {0} opened successful", sourceVideo);
 			LOG_CORE_INFO("Video FPS: {}", m_videoInfo.fps);
 			LOG_CORE_INFO("Total frames: {0}", m_videoInfo.frameCount); 
 			LOG_CORE_INFO("Video resolution: {0}x{1}", m_videoInfo.frameSize.width, m_videoInfo.frameSize.height);
@@ -250,8 +306,8 @@ namespace iris
 			return true;
 		}
 
-		LOG_CORE_ERROR("Video: {0} could not be opened\nInformation is missing or corrupt", videoName);
-		throw std::runtime_error("Video: "+ std::string(videoName) +"could not be opened\nInformation is missing or corrupt");
+		LOG_CORE_ERROR("Video: {0} could not be opened\nInformation is missing or corrupt", sourceVideo);
+		throw std::runtime_error("Video: "+ std::string(sourceVideo) +"could not be opened\nInformation is missing or corrupt");
 		return false;
 	}
 

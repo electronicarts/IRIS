@@ -8,6 +8,7 @@
 #include <opencv2/core.hpp>
 #include "iris/Configuration.h"
 #include <iris/Log.h>
+#include "iris/FrameData.h"
 
 //redefine logging macros
 #ifdef LOG_CORE_DEBUG

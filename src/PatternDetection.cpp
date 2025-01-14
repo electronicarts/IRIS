@@ -1,13 +1,14 @@
 //Copyright (C) 2023 Electronic Arts, Inc.  All rights reserved.
 
 #include "PatternDetection.h"
-#include "FrameData.h"
+#include "iris/FrameData.h"
 #include "IrisFrame.h"
 #include "iris/Result.h"
 #include "iris/Log.h"
 #include "iris/Configuration.h"
 #include "ConfigurationParams.h"
 #include "iris/TotalFlashIncidents.h"
+#include "IFrameManager.h"
 
 
 #include <map>
@@ -23,8 +24,8 @@
 namespace iris
 {
 
-PatternDetection::PatternDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize) 
-    : m_params(configuration->GetPatternDetectionParams()), m_fps(fps), m_isFail(false), m_patternFailFrames(0)
+PatternDetection::PatternDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize, IFrameManager* frameManager) 
+	: m_params(configuration->GetPatternDetectionParams()), m_fps(fps), m_isFail(false), m_patternFailFrames(0), m_frameManager(frameManager)
 
 {
     if (frameSize.width > 480)
@@ -51,6 +52,8 @@ PatternDetection::PatternDetection(Configuration* configuration, const short& fp
     m_patternFrameCount.count.reserve(m_frameTimeThresh);
     m_patternFrameCount.count.push_back(0);
 
+    m_managerIndx = m_frameManager->RegisterManager(m_frameTimeThresh, m_params->timeThreshold);
+    
     //TODO:: CACULATE CROPPED IMAGE
     centerPoint = cv::Point(scaleSize.width / 2, scaleSize.height / 2);
 
@@ -115,7 +118,8 @@ PatternDetection::Pattern PatternDetection::detectPattern(const IrisFrame& irisF
 
 void PatternDetection::checkFrameCount(FrameData& data)
 {
-    if (m_patternFrameCount.current >= m_frameTimeThresh)
+    int framesInHalfSecond = m_frameManager->GetCurrentFrameNum(m_managerIndx);
+    if(m_patternFrameCount.current >= framesInHalfSecond)
     {
         data.patternFrameResult = PatternResult::Fail;
         m_isFail = true;
@@ -126,7 +130,8 @@ void PatternDetection::checkFrameCount(FrameData& data)
         data.patternFrameResult = PatternResult::Pass;
     }
 
-    if (m_patternFrameCount.count.size() == m_frameTimeThresh)
+    int frameExcess = m_frameManager->GetFramesToRemove(m_managerIndx);
+    for (frameExcess; frameExcess > 0; frameExcess--)
     {
         m_patternFrameCount.updatePassed();
     }
@@ -389,7 +394,6 @@ std::tuple<std::vector<cv::Point>, int> PatternDetection::getSimilarContours(con
 
 bool PatternDetection::isFail()
 {
-    LOG_CORE_INFO("Pattern FAIL: {}", (m_isFail ? "true" : "false"));
 	return m_isFail;
 }
 
@@ -397,11 +401,11 @@ void PatternDetection::setResult(Result& result)
 {
     if (isFail())
     {
+        LOG_CORE_CRITICAL("Pattern Failure");
         result.OverallResult = AnalysisResult::Fail;
         result.Results.push_back(AnalysisResult::PatternFailure);
         result.patternFailFrames = m_patternFailFrames;
     }
-
 }
 
 

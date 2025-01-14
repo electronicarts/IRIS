@@ -7,26 +7,38 @@
 #include "RelativeLuminance.h"
 #include "IrisFrame.h"
 #include <limits>
+#include "FpsFrameManager.h"
 
 namespace iris::Tests
 {
 	class RelativeLuminanceTest : public IrisLibTest {
 	protected:
 		EA::EACC::Utils::FrameConverter* frameRgbConverter = nullptr;
-		void SetUp() override {
-			configuration.SetLuminanceType(Configuration::LuminanceType::RELATIVE);
+		IFrameManager* frameManager = nullptr;
+		cv::Size size = { 1280, 720 };
+
+		void SetUp() override 
+		{
 			IrisLibTest::SetUp();
 			frameRgbConverter = new EA::EACC::Utils::FrameConverter(configuration.GetFrameSrgbConverterParams());
+			frameManager = new FpsFrameManager();
 		}
-		~RelativeLuminanceTest() override {
+
+		RelativeLuminance GetLuminance(short fps, cv::Size size = { 1280, 720 })
+		{
+			return RelativeLuminance(fps, size, configuration.GetLuminanceFlashParams(), frameManager);
+		}
+
+		~RelativeLuminanceTest() override 
+		{
 			delete frameRgbConverter;
+			delete frameManager;
 		}
 	};
 
 	TEST_F(RelativeLuminanceTest, Luminance_When_WhiteFrame_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageBgr(size, CV_8UC3, white);
 		
 		IrisFrame imagesRgb;
@@ -42,8 +54,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, Luminance_WhenBlackFrame_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageBgr(size, CV_8UC3, black);
 		
 		IrisFrame imagesRgb;
@@ -59,8 +70,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, Luminance_When_GrayFrame_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageBgr(size, CV_8UC3, gray);
 
 		IrisFrame imagesRgb;
@@ -77,8 +87,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, Luminance_When_BlueFrame_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageBgr(size, CV_8UC3, blue);
 		
 		IrisFrame imagesRgb;
@@ -95,8 +104,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, TransitionBlackWhite_FrameDifference_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageWhiteBgr(size, CV_8UC3, white);
 		IrisFrame pImageWhitesRgb;
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
@@ -117,8 +125,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, TransitionWhiteBlack_FrameDifference_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageWhiteBgr(size, CV_8UC3, white);
 		IrisFrame pImageWhitesRgb;
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
@@ -139,8 +146,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, TransitionWhiteBlackBlack_FrameDifference_Test)
 	{
-		cv::Size size(1280, 720);
-		RelativeLuminance relativeLuminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat imageWhiteBgr(size, CV_8UC3, white);
 		IrisFrame pImageWhitesRgb;
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
@@ -162,7 +168,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest,CheckTransition_WhenFalse_From_value_to_zero_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.02f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -174,7 +180,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_value_to_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.02f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -186,7 +192,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_value_to_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.07f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -198,7 +204,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_threshold_value_to_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.1f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -210,7 +216,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_value_to_negative_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.2f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -222,7 +228,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = -0.1f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -234,7 +240,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_value_to_negative_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = 0.1f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -246,7 +252,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_value_to_zero_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = -0.05f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -258,7 +264,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenTrue_From_negative_value_to_negative_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = -0.05f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -270,7 +276,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_negative_threshold_value_to_negative_value_Test)
 	{
-		RelativeLuminance relativeLuminance(5, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(5);
 		float testLastAvg = -0.11f;
 
 		//SameSign (positive) 0 case && !newTransition
@@ -282,24 +288,31 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, CheckTransition_WhenFalse_From_zero_to_negative_threshold_value_to_negative_threshold_value_Test)
 	{
-		RelativeLuminance relativeLuminance(2, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(2);
+		
+		frameManager->AddFrame(FrameData{});
 		float testLastAvg = 0;
 
 		//SameSign (positive) 0 case && !newTransition
+		frameManager->AddFrame(FrameData{});
 		Flash::CheckTransitionResult transitionResult = relativeLuminance.CheckTransition(-0.11f, testLastAvg);
 		testLastAvg = transitionResult.lastAvgDiffAcc;
+		
+		frameManager->AddFrame(FrameData{});
 		transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
 		testLastAvg = transitionResult.lastAvgDiffAcc;
+		
+		frameManager->AddFrame(FrameData{});
 		transitionResult = relativeLuminance.CheckTransition(-0.1f, testLastAvg);
 
 		EXPECT_FALSE(transitionResult.checkResult);
 		EXPECT_EQ(-0.2f, Flash::roundoff(transitionResult.lastAvgDiffAcc, 2));
 	}
 
-	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenWhite_Test)
+	TEST_F(RelativeLuminanceTest, AverageLuminance_WhenWhite_Test)
 	{
-		RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
-		cv::Mat imageWhiteBgr(1280, 720, CV_8UC3, white);
+		RelativeLuminance relativeLuminance= GetLuminance(3);
+		cv::Mat imageWhiteBgr(size, CV_8UC3, white);
 		IrisFrame pImageWhitesRgb;
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
 
@@ -310,10 +323,10 @@ namespace iris::Tests
 		pImageWhitesRgb.Release();
 	}
 
-	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenGray_Test)
+	TEST_F(RelativeLuminanceTest, AverageLuminance_WhenGray_Test)
 	{
-		RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
-		cv::Mat imageWhiteBgr(1280, 720, CV_8UC3, gray);
+		RelativeLuminance relativeLuminance = GetLuminance(3);
+		cv::Mat imageWhiteBgr(size, CV_8UC3, gray);
 		IrisFrame pImageWhitesRgb;
 		pImageWhitesRgb.sRgbFrame = frameRgbConverter->Convert(imageWhiteBgr);
 
@@ -324,9 +337,9 @@ namespace iris::Tests
 		pImageWhitesRgb.Release();
 	}
 
-	TEST_F(RelativeLuminanceTest, AverageLuminanca_WhenRealFrame_Test)
+	TEST_F(RelativeLuminanceTest, AverageLuminance_WhenRealFrame_Test)
 	{
-		RelativeLuminance relativeLuminance(3, cv::Size(), configuration.GetLuminanceFlashParams());
+		RelativeLuminance relativeLuminance = GetLuminance(3);
 		cv::Mat frameBgr = cv::imread("data/TestImages/frames/FrameForTest.jpg");
 		IrisFrame pFramesRgb;
 		pFramesRgb.sRgbFrame = frameRgbConverter->Convert(frameBgr);
@@ -340,10 +353,10 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, SafeArea_No_Change_Threshold)
 	{
-		cv::Size size(5, 5);
-		RelativeLuminance luminance(3, size, configuration.GetLuminanceFlashParams());
+		cv::Size testSize(5, 5);
+		RelativeLuminance luminance = GetLuminance(3, testSize);
 
-		cv::Mat imageBgr(size, CV_8UC3, blue);
+		cv::Mat imageBgr(testSize, CV_8UC3, blue);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);
 
 		luminance.SetCurrentFrame(imageSbgr);
@@ -362,7 +375,7 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, SafeArea_20_Percent_Change_Threshold)
 	{
-		cv::Size size(5, 5);
+		cv::Size testSize(5, 5);
 
 		float frameDiffArray[5][5] = {
 				{ 200, 200, 200, 0, 0 },
@@ -371,15 +384,15 @@ namespace iris::Tests
 				{ 0, 0, 0, 0, 0 },
 				{ 0, 0, 0, 0, 0 }
 		};
-		cv::Mat frameDiff = cv::Mat(size, CV_32FC1, &frameDiffArray);
+		cv::Mat frameDiff = cv::Mat(testSize, CV_32FC1, &frameDiffArray);
 
-		RelativeLuminance luminance(3, size, configuration.GetLuminanceFlashParams());
+		RelativeLuminance luminance = GetLuminance(3, testSize);
 
-		cv::Mat imageBgr(size, CV_8UC3, blue);
+		cv::Mat imageBgr(testSize, CV_8UC3, blue);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);
 		luminance.SetCurrentFrame(imageSbgr);
 
-		cv::Mat imageBgr2(size, CV_8UC3, white);
+		cv::Mat imageBgr2(testSize, CV_8UC3, white);
 		cv::Mat* imageSbgr2 = frameRgbConverter->Convert(imageBgr2);
 		luminance.SetCurrentFrame(imageSbgr2);
 
@@ -395,14 +408,14 @@ namespace iris::Tests
 
 	TEST_F(RelativeLuminanceTest, SafeArea_100_Percent_Change_Threshold)
 	{
-		cv::Size size(5, 5);
-		RelativeLuminance luminance(3, size, configuration.GetLuminanceFlashParams());
+		cv::Size testSize(5, 5);
+		RelativeLuminance luminance = GetLuminance(3, testSize);
 
-		cv::Mat imageBgr(size, CV_8UC3, blue);
+		cv::Mat imageBgr(testSize, CV_8UC3, blue);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);
 		luminance.SetCurrentFrame(imageSbgr);
 
-		cv::Mat imageBgr2(size, CV_8UC3, white);
+		cv::Mat imageBgr2(testSize, CV_8UC3, white);
 		cv::Mat* imageSbgr2 = frameRgbConverter->Convert(imageBgr2);
 		luminance.SetCurrentFrame(imageSbgr2);
 

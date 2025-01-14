@@ -5,26 +5,38 @@
 #include "RedSaturation.h"
 #include "IrisLibTest.h"
 #include <opencv2/opencv.hpp>
+#include "FpsFrameManager.h"
 
 namespace iris::Tests
 {
 	class RedSaturationTests : public IrisLibTest {
 	protected:
 		EA::EACC::Utils::FrameConverter* frameRgbConverter = nullptr;
+		IFrameManager* frameManager;
+		cv::Size size{ 100, 100 };
 
-		void SetUp() override {
+		void SetUp() override 
+		{
 			IrisLibTest::SetUp();
 			frameRgbConverter = new EA::EACC::Utils::FrameConverter(configuration.GetFrameSrgbConverterParams());
+			frameManager = new FpsFrameManager();
 		}
-		~RedSaturationTests() override {
+
+		RedSaturation GetRedSaturation(short fps, cv::Size size = {100, 100})
+		{
+			return RedSaturation(fps, size, configuration.GetRedSaturationFlashParams(), frameManager);
+		}
+
+		~RedSaturationTests() override 
+		{
 			delete frameRgbConverter;
+			delete frameManager;
 		}
 	};
 
 	TEST_F(RedSaturationTests, Positive_FrameDifference)
 	{
-		cv::Size size(100, 100);
-		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(0);
 		cv::Mat redImageBgr(size, CV_8UC3, red);
 		cv::Mat* pRedSrgb = frameRgbConverter->Convert(redImageBgr);
 		
@@ -51,8 +63,7 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, Negative_FrameDifference)
 	{
-		cv::Size size(2000, 2000);
-		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(0);
 		cv::Mat redImageBgr(size, CV_8UC3, red);
 		cv::Mat* pRedSrgb = frameRgbConverter->Convert(redImageBgr);
 
@@ -79,8 +90,7 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, Positive_FrameDifference_PartialRed)
 	{
-		cv::Size size(100, 100);
-		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(0);
 
 		cv::Mat blackImageBgr(size, CV_8UC3, black);
 		cv::Mat* pBlackSrgb = frameRgbConverter->Convert(blackImageBgr);
@@ -111,8 +121,7 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, Negative_FrameDifference_PartialRed)
 	{
-		cv::Size size(100, 100);
-		RedSaturation redSaturation(0, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(0);
 		
 		cv::Mat blackImageBgr(size, CV_8UC3, black);
 		cv::Mat* pBlackSrgb = frameRgbConverter->Convert(blackImageBgr);
@@ -144,12 +153,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Positive_Value_To_Zero)
 	{
-		RedSaturation redSaturation (5, cv::Size(), configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(5);
 
 		float testLastAvg = 5.2f;
 
 		//SameSign (positive) 0 case && !newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(0, testLastAvg);
 
 		EXPECT_EQ(5.2f, transitionResult.lastAvgDiffAcc);
@@ -158,13 +166,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Positive_Value_Increment_NoTransition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 
 		float testLastAvg = 5.2f;
 
 		//SameSign (positive) && !newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.0f, testLastAvg);
 
 		EXPECT_EQ(15.2f, transitionResult.lastAvgDiffAcc);
@@ -173,13 +179,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Positive_Value_Increment_Transition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 
 		float testLastAvg = 15.2f;
 
 		//SameSign (positive) && newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(5.0f, testLastAvg);
 
 		EXPECT_EQ(20.2f, transitionResult.lastAvgDiffAcc);
@@ -188,13 +192,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Positive_Value_Decrement_NoTransition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 		
 		float testLastAvg = 20.2f;
 
 		//SameSign (positive) && !newTransition (last was a transition)
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(10.3f, testLastAvg);
 
 		EXPECT_EQ(30.5f, transitionResult.lastAvgDiffAcc);
@@ -203,13 +205,11 @@ namespace iris::Tests
 	
 	TEST_F(RedSaturationTests, CheckTransition_ToNegative_Transition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 		
 		float testLastAvg = 30.5f;
 
 		//!SameSign (negative) && newTransition 
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-20.0f, testLastAvg);
 
 		EXPECT_EQ(-20.0f, transitionResult.lastAvgDiffAcc);
@@ -218,13 +218,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_ToPositive_NoTransition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 		
 		float testLastAvg = -20.0f;
 
 		//SameSign (positive) && !newTransition (last was a transition)
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(25.0f, testLastAvg);
 
 		EXPECT_EQ(25.0f, transitionResult.lastAvgDiffAcc);
@@ -233,13 +231,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_ToNegative_NoTransition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(5);
 
-		
 		float testLastAvg = 25.0f;
 
 		//!SameSign (negative) && !newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-10.0f, testLastAvg);
 
 		EXPECT_EQ(-10.0f, transitionResult.lastAvgDiffAcc);
@@ -248,13 +244,11 @@ namespace iris::Tests
 	
 	TEST_F(RedSaturationTests, CheckTransition_Negative_Value_To_Zero)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(5);
 
-		
 		float testLastAvg = -10.0f;
 
 		//SameSign (negative) 0 case && !newTransition
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(0.0f, testLastAvg);
 
 		EXPECT_EQ(-10.0f, transitionResult.lastAvgDiffAcc);
@@ -263,7 +257,7 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Negative_Value_Decrement_Transition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(5);
 		
 		float testLastAvg = -10.0f;
 
@@ -276,13 +270,11 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Negative_Value_Decrement_NoTransition)
 	{
-		RedSaturation redSaturation(5, cv::Size(), configuration.GetRedSaturationFlashParams());
-
+		RedSaturation redSaturation = GetRedSaturation(5);
 		
 		float testLastAvg = -25.0f;
 
 		//SameSign (negative) && !newTransition (last was a transition)
-
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-30.6f, testLastAvg);
 
 		EXPECT_EQ(-55.6f, transitionResult.lastAvgDiffAcc);
@@ -291,14 +283,20 @@ namespace iris::Tests
 
 	TEST_F(RedSaturationTests, CheckTransition_Negative_Decrements_NoTransition)
 	{
-		RedSaturation redSaturation(2, cv::Size(), configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(2);
 		
+		frameManager->AddFrame(FrameData{});
 		float testLastAvg = 0.0f;
 
 		//SameSign (negative) && !newTransition (last was a transition)
-
+		frameManager->AddFrame(FrameData{});
 		Flash::CheckTransitionResult transitionResult = redSaturation.CheckTransition(-25.6f, testLastAvg);
+		
+		
+		frameManager->AddFrame(FrameData{});
 		transitionResult = redSaturation.CheckTransition(-30.6f, transitionResult.lastAvgDiffAcc);
+		
+		frameManager->AddFrame(FrameData{});
 		transitionResult = redSaturation.CheckTransition(-10.6f, transitionResult.lastAvgDiffAcc);
 
 		EXPECT_EQ(-41.2f, transitionResult.lastAvgDiffAcc);
@@ -308,7 +306,7 @@ namespace iris::Tests
 	TEST_F(RedSaturationTests, SafeArea_No_Change_Threshold)
 	{
 		cv::Size size(5, 5);
-		RedSaturation redSaturation(3, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(3, size);
 
 		cv::Mat imageBgr(size, CV_8UC3, red);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);
@@ -340,7 +338,7 @@ namespace iris::Tests
 		};
 		cv::Mat frameDiff = cv::Mat(size, CV_32FC1, &frameDiffArray);
 
-		RedSaturation redSaturation(3, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(3, size);
 
 		cv::Mat imageBgr(size, CV_8UC3, blue);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);
@@ -363,7 +361,7 @@ namespace iris::Tests
 	TEST_F(RedSaturationTests, SafeArea_100_Percent_Change_Threshold)
 	{
 		cv::Size size(5, 5);
-		RedSaturation redSaturation(3, size, configuration.GetRedSaturationFlashParams());
+		RedSaturation redSaturation = GetRedSaturation(3, size);
 
 		cv::Mat imageBgr(size, CV_8UC3, blue);
 		cv::Mat* imageSbgr = frameRgbConverter->Convert(imageBgr);

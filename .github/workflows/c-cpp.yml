@@ -48,6 +48,13 @@ jobs:
             mkdir -p ${{ github.workspace }}/vcpkg/bincache
           fi
         shell: bash
+
+      - name: Install packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm autoconf automake libtool pkg-config
+        
+      - if: runner.os == 'macOS'
+        run: brew install nasm
           
       - uses: lukka/get-cmake@latest
 
@@ -55,7 +62,7 @@ jobs:
         uses: lukka/run-vcpkg@v4
         with:
           setupOnly: true
-          vcpkgGitCommitId: 0affe8710a4a5b26328e909fe1ad7146df39d108
+          vcpkgGitCommitId: d320630b28aeb59b24424eb2a7ef3905314107a1
       
       # Restore vpkg cache
       - name: Restore vcpkg
@@ -72,13 +79,6 @@ jobs:
         
       # Ensure that the developer command promt is present on Windows runners
       - uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install packages
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm
-        
-      - if: runner.os == 'macOS'
-        run: brew install nasm
 
       - name: Restore from cache the dependencies and generate project files
         run: |

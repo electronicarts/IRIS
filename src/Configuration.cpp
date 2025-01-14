@@ -8,7 +8,8 @@
 
 namespace iris
 {
-	Configuration::Configuration()
+	Configuration::Configuration() : m_analyseByTime(false), m_patternDetectionEnabled(false), 
+		m_frameResizeEnabled(false), m_frameResizeProportion(1.0f)
 	{
 	}
 
@@ -27,11 +28,6 @@ namespace iris
 		if (m_frameSrgbConverterParams != nullptr)
 		{
 			delete m_frameSrgbConverterParams; m_frameSrgbConverterParams = nullptr;
-		}
-
-		if (m_frameCDLuminanceConverterParams != nullptr)
-		{
-			delete m_frameCDLuminanceConverterParams;  m_frameCDLuminanceConverterParams = nullptr;
 		}
 
 		if (m_transitionTrackerParams != nullptr)
@@ -53,33 +49,16 @@ namespace iris
 
 		m_resultsPath = jsonFile.ContainsParam("ResultsPath") ? jsonFile.GetParam<std::string>("ResultsPath") : "Results/";
 
-		if (m_luminanceType == LuminanceType::UN_SET)
-		{ 
-			std::string lumType = jsonFile.GetParam<std::string>("VideoAnalyser", "LuminanceType");
-			m_luminanceType = lumType == "CD" ? LuminanceType::CD : LuminanceType::RELATIVE;
-		}
-
 		m_patternDetectionEnabled = jsonFile.GetParam<bool>("VideoAnalyser", "PatternDetectionEnabled");
 		m_frameResizeEnabled = jsonFile.GetParam<bool>("VideoAnalyser", "FrameResizeEnabled");
 
 		m_frameResizeProportion = jsonFile.GetParam<float>("VideoAnalyser", "ResizeFrameProportion");
-		
-		//Luminance
-		if (m_luminanceType == LuminanceType::CD)
-		{ 
-			m_luminanceFlashParams = new FlashParams(
-				jsonFile.GetParam<float>("Luminance", "CdLuminanceFlashThreshold"), 
-				jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
-				jsonFile.GetParam<float>("Luminance", "CdDarkLuminanceThreshold"));
-		}
-		else 
-		{ 
-			m_luminanceFlashParams = new FlashParams(
-				jsonFile.GetParam<float>("Luminance", "RelativeLuminanceFlashThreshold"), 
-				jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
-				jsonFile.GetParam<float>("Luminance", "RelativeDarkLuminanceThreshold"));
-		}
-		
+
+		m_luminanceFlashParams = new FlashParams(
+			jsonFile.GetParam<float>("Luminance", "RelativeLuminanceFlashThreshold"), 
+			jsonFile.GetParam<float>("FlashDetection", "AreaProportion"), 
+			jsonFile.GetParam<float>("Luminance", "RelativeDarkLuminanceThreshold"));
+	
 		//Red Saturation
 		m_redSaturationFlashParams = new FlashParams(
 			jsonFile.GetParam<float>("RedSaturation", "FlashThreshold"), 
@@ -90,33 +69,20 @@ namespace iris
 		m_frameSrgbConverterParams = new EA::EACC::Utils::FrameConverterParams(
 			jsonFile.GetVector<float>("FlashDetection", "sRGBValues"));
 
-		//FrameRgbConverter Params for CD Luminance conversion
-		if (m_luminanceType == LuminanceType::CD)
-		{
-			m_frameCDLuminanceConverterParams = new EA::EACC::Utils::FrameConverterParams(
-				jsonFile.GetVector<float>("Luminance", "CdLuminanceValues"));
-		}
-
 		//Transition Tracker Params
 		m_transitionTrackerParams = new TransitionTrackerParams(
 			jsonFile.GetParam<uint>("TransitionTracker", "MaxTransitions"), 
 			jsonFile.GetParam<uint>("TransitionTracker", "MinTransitions"),
-			jsonFile.GetParam<uint>("TransitionTracker", "ExtendedFailSeconds"), 
+			jsonFile.GetParam<uint>("TransitionTracker", "ExtendedFailSeconds"),
 			jsonFile.GetParam<uint>("TransitionTracker", "ExtendedFailWindow"),
-			jsonFile.GetParam<bool>("TransitionTracker", "AnalyseByTime"));
+			jsonFile.GetParam<uint>("TransitionTracker", "WarningTransitions"));
+
 
 		//Pattern Detection
 		int minStripes = jsonFile.GetParam<int>("PatternDetection", "MinStripes");
 		float darkLumThreshold = 0.0f;
 		
-		if (m_luminanceType == LuminanceType::CD)
-		{ 
-			darkLumThreshold = jsonFile.GetParam<float>("PatternDetection", "CDDarkLuminanceThreshold"); 
-		}
-		else 
-		{ 
-			darkLumThreshold = jsonFile.GetParam<float>("PatternDetection", "RelativeDarkLuminanceThreshold"); 
-		}
+		darkLumThreshold = jsonFile.GetParam<float>("PatternDetection", "RelativeDarkLuminanceThreshold"); 
 
 		m_patternDetectionParams = new PatternDetectionParams(
 			minStripes, 
@@ -135,4 +101,12 @@ namespace iris
 	{
 		return m_luminanceFlashParams->areaProportion;
 	}
+
+	void Configuration::SetRedSaturationFlashThreshold(float newFlashThreshold) { m_redSaturationFlashParams->flashThreshold = newFlashThreshold; };
+	void Configuration::SetRedSaturationDarkThreshold(float newDarkThreshold) { m_redSaturationFlashParams->darkThreshold = newDarkThreshold; };
+
+	void Configuration::SetLuminanceFlashThreshold(float newFlashThreshold) { m_luminanceFlashParams->flashThreshold = newFlashThreshold; };
+	void Configuration::SetLuminanceDarkThreshold(float newDarkThreshold) { m_luminanceFlashParams->darkThreshold = newDarkThreshold; };
+
+	void Configuration::SetMinimumTransitionsForWarning(int count) { m_transitionTrackerParams->warningTransitions = count; }
 }

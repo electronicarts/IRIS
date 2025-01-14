@@ -11,6 +11,7 @@ namespace cv
 
 namespace iris
 {
+	class IFRameManager;
 	struct FlashParams;
 	struct IrisFrame;
 	
@@ -22,11 +23,11 @@ namespace iris
 		/// </summary>
 		/// <param name="fps"></param>
 		/// <param name="flashThreshold"></param>
-		RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params);
+		RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params, IFrameManager* frameManager);
 
 
 		void SetCurrentFrame(const IrisFrame& irisFrame) override;
-		void SetCurrentFrame(cv::Mat* bgrFrame) override;
+		void SetCurrentFrame(cv::Mat* bgrFrame);
 		
 		~RelativeLuminance();
 	protected:

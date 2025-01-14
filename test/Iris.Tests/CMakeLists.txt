@@ -3,7 +3,7 @@
 project(iris_tests)
 
 set(HEADER_FILES
-    "include/IrisLibTest.h"    
+    "include/IrisLibTest.h"
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -12,12 +12,11 @@ set(SOURCE_FILES
    "src/FlashTest.cpp"
    "src/RedSaturationTests.cpp"
    "src/RelativeLuminanceTest.cpp"
-   "src/CDLuminanceTest.cpp"
    "src/FlashDetectionTests.cpp"
    "src/PatternDetectionTests.cpp" 
    "src/VideoAnalysisTests.cpp"
-   "src/TransitionTrackerByFPSTests.cpp"
-   "src/TransitionTrackerByTimeTests.cpp"
+   "src/TransitionTrackerTests.cpp"
+   "src/FrameManagerTests.cpp"
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})
