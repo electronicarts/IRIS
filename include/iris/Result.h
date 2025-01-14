@@ -2,7 +2,7 @@
 
 #pragma once
 #include <vector>
-#include "../src/FrameData.h"
+#include "iris/FrameData.h"
 #include "iris/TotalFlashIncidents.h"
 
 namespace iris

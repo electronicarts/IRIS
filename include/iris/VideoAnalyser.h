@@ -37,6 +37,7 @@ namespace iris
 	class PatternDetection;
 	class PhotosensitivityDetector;
 	class FrameData;
+	class IFrameManager;
 	struct FrameDataJson;
 	struct Result;
 
@@ -52,6 +53,11 @@ namespace iris
 		void Init(const std::string& videoName, bool flagJson = false);
 
 		/// <summary>
+		/// Real time use Only - Initializes FlashDetection and PatternDection
+		/// </summary>
+		void RealTimeInit(cv::Size& frameSize);
+
+		/// <summary>
 		/// Release FlashDetection and PatternDection
 		/// </summary>
 		void DeInit();
@@ -59,7 +65,7 @@ namespace iris
 		/// <summary>
 		/// Checks if the video file can be opened and read
 		/// </summary>
-		bool VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video, const char* videoName);
+		bool VideoIsOpen(const char* sourceVideo, cv::VideoCapture& video);
 
 		/// <summary>
 		/// Anlyses video to check photosensitivity
@@ -87,8 +93,11 @@ namespace iris
 			cv::Size frameSize; //video resolution
 		};
 
-		inline VideoInfo GetVideoInfo() { return m_videoInfo; }
+		[[nodiscard]] inline VideoInfo GetVideoInfo() const { return m_videoInfo; }
 		
+		[[nodiscard]] inline std::string GetResultJsonPath() const { return m_resultJsonPath; };
+		[[nodiscard]] inline std::string GetFrameDataJsonPath() const {return m_frameDataJsonPath;};
+		[[nodiscard]] inline std::string GetFrameDataPath() const {return m_frameDataPath;};
 	private:
 
 		/// <summary>
@@ -114,7 +123,9 @@ namespace iris
 
 		std::string m_resultJsonPath;
 		std::string m_frameDataJsonPath;
+		std::string m_frameDataPath;
 
+		IFrameManager* m_frameManager = nullptr;
 		VideoInfo m_videoInfo;
 	};
 }

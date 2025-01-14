@@ -13,6 +13,7 @@ namespace cv
 
 namespace iris
 {
+	class IFrameManager;
 	struct FlashParams;
 	struct CheckTransitionResult;
 	struct IrisFrame;
@@ -24,7 +25,7 @@ namespace iris
 		/// <param name="fps"></param>
 		/// <param name="flashParams">struct with config parameters</param>
 		/// <param name="method">method to use to check the flashing area</param>
-		Flash(short fps, const cv::Size& frameSize, FlashParams* flashParams);
+		Flash(short fps, const cv::Size& frameSize, FlashParams* flashParams, IFrameManager* frameManager);
 
 		virtual ~Flash();
 
@@ -134,6 +135,10 @@ namespace iris
 		float m_avgLastFrame = 0;
 		float m_flashArea = 0;
 		int m_frameSize = 0; //frame width * frame height
+
+		const float TIME_WINDOW = 1.0; //max time to consider for calculating flash frequency
+		int m_managerIndx;
+		IFrameManager* m_frameManager;
 	};
 
 }

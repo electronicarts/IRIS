@@ -2,7 +2,7 @@
 
 #pragma once
 #include <opencv2/core.hpp>
-#include "FrameData.h"
+#include "iris/FrameData.h"
 
 namespace iris
 {

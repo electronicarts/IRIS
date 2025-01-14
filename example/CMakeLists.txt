@@ -6,7 +6,7 @@ project(IrisApp)
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} "main.cpp")
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/appsettings.json ${CMAKE_CURRENT_BINARY_DIR}/appsettings.json COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/appsettings.json ${CMAKE_CURRENT_BINARY_DIR}/appsettings.json COPYONLY)
 
 # Included libraries
 target_link_libraries(${PROJECT_NAME} iris)

@@ -24,13 +24,14 @@ namespace iris
 {
 	class Flash;
 	class FrameData;
+	class IFrameManager;
 	struct IrisFrame;
 	struct Result;
 
 	class FlashDetection : public PhotosensitivityDetector
 	{
 	public:
-		FlashDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize);
+		FlashDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize, IFrameManager* frameManager);
 		~FlashDetection();
 
 		/// <summary>
@@ -48,9 +49,14 @@ namespace iris
 		void checkFrame(const IrisFrame& irisFrame, const int& framePos, FrameData& data) override;
 		
 		/// <summary>
-		/// Returns the flash analysis result
+		/// Returns true if the flash analysis overall result = Fail 
 		/// </summary>
 		bool isFail() override;
+
+		/// <summary>
+		/// Returns true if the flash analysis overall result = PassWithWarning
+		/// </summary>
+		bool isWarning();
 
 		/// <summary>
 		/// Sets the flash detection results for a chunk result object
@@ -72,7 +78,6 @@ namespace iris
 		Flash* m_luminance = nullptr;
 		Flash* m_redSaturation = nullptr;
 		EA::EACC::Utils::FrameConverter m_sRgbConverter;
-		EA::EACC::Utils::FrameConverter* m_cdLuminanceConverter = nullptr;
 
 		float m_lastAvgLumDiffAcc = 0; //first frame has 0 variation
 		float m_lastAvgRedDiffAcc = 0; //first frame has 0 variation

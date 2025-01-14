@@ -7,6 +7,7 @@
 namespace iris
 {
 	class FrameData;
+	class IFrameManager;
 	class Configuration;
 	struct IrisFrame;
 	struct Result;
@@ -33,7 +34,7 @@ namespace iris
 class PatternDetection : public  PhotosensitivityDetector
 {
 public:
-	PatternDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize);
+	PatternDetection(Configuration* configuration, const short& fps, const cv::Size& frameSize, IFrameManager* frameManager);
 
 	//Checks a video frame for harmful patterns
 	void checkFrame(const IrisFrame& irisFrame, const int& framePos, FrameData& data) override;
@@ -94,12 +95,18 @@ private:
 		const cv::Mat& contourMat);
 #endif // DEBUG_PATTERN_REGION true
 
-
-
 	struct Counter
 	{
 		void updateCurrent(bool add)
 		{
+			//Real-time only. If a big frame drop occurs
+			if (count.empty())
+			{
+				count.emplace_back(add);
+				current = add;
+				return;
+			}
+			
 			if (add)
 			{
 				count.emplace_back(count.back() + 1);
@@ -109,23 +116,28 @@ private:
 				count.emplace_back(count.back());
 			}
 
-			current = count.back() - passed;
+			current = count.back() - passed; 
 		}
 
 		void updatePassed()
 		{
 			passed = count.front();
 			count.erase(count.begin());
-		}
 
+			//Real-time only. If a big frame drop occurs
+			if (count.empty())
+			{
+				passed = 0;
+				current = 0;
+			}
+		}
 		std::vector<int> count;
-		int passed;
-		int current;
+		int passed = 0;
+		int current = 0;
 	};
 
 	PatternDetectionParams* m_params;
-
-
+	IFrameManager* m_frameManager;
 	Counter m_patternFrameCount;
 
 	int m_frameTimeThresh;
@@ -138,6 +150,7 @@ private:
 	int m_diffThreshold; //number of pixels that must have changed to continue the pattern detection flow
 	bool m_isFail;
 	int m_contourThreshArea;
+	int m_managerIndx; //FrameManager vectors index
 
 	cv::Mat m_dilationElement;
 	cv::Mat m_erosionElement;

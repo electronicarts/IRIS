@@ -45,3 +45,4 @@ namespace iris
 
 //Data Logger macro - only used for data persistence
 #define LOG_DATA_INFO(...)			iris::Log::GetDataLogger()->info(__VA_ARGS__)
+#define FLUSH_DATA_LOGGER()			iris::Log::GetDataLogger()->flush()

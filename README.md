@@ -50,8 +50,6 @@ When running IRIS in the example app, the following command line arguments can b
 - `-j`: when passing true/1 generates the results in a json file. 
 - `-v`: the path to a video can be specified as to. 
 - `-p`: enabled/disable the pattern detection (true/1 or false/0).
-- `-l`: specify the luminance type for the luminance calculations (CD || RELATIVE), relative luminance is the default and standard.
-
 
 ## Configuration 
 The [appsettings.json](config/appsettings.json) is a file where values used by IRIS are defined and can be modified to alter the execution of the analysis. These default values are configured to detect photosensitive content based on publicly available guidelines. IRIS is not intended to guarantee, certify or otherwise validate video content’s photosensitivity compliance. Modifying IRIS’s default values should be done at your own risk, understanding that doing so may impact IRIS’s results and its ability to detect photosensitivity issues.  

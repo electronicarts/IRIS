@@ -12,13 +12,14 @@ namespace cv
 
 namespace iris
 {
+	class IFrameManager;
 	struct FlashParams;
 
 	class RedSaturation : public Flash
 	{
 	public:
 
-		RedSaturation(short fps, const cv::Size& frameSize, FlashParams* params);
+		RedSaturation(short fps, const cv::Size& frameSize, FlashParams* params, IFrameManager* frameManager);
 		~RedSaturation();
 
 		void SetCurrentFrame(cv::Mat* sRgbFrame) override;

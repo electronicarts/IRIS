@@ -9,13 +9,14 @@ namespace iris
 
 	struct TransitionTrackerParams;
 	class FrameData;
+	class IFrameManager;
 
 	class TransitionTracker
 	{
 
 	public:
-
-		virtual ~TransitionTracker() {};
+		
+		TransitionTracker(unsigned int fps, TransitionTrackerParams* params, IFrameManager* frameManager);
 
 		inline bool getLumPassWithWarning() { return m_luminanceResults.passWithWarning; };
 		inline bool getRedPassWithWarning() { return m_redResults.passWithWarning; };
@@ -39,24 +40,21 @@ namespace iris
 		/// <param name="lumTransition">true if there is a new luminance transition</param>
 		/// <param name="redTransition">true if there is a new red transition</param>
 		/// <param name="data">data to persist</param>
-		virtual void SetTransitions(bool lumTransition, bool redTransition, FrameData& data)=0;
+		/// <param name="framePos"> current frame index </param>
+		void SetTransitions(bool lumTransition, bool redTransition, FrameData& data, const int& framePos = 0);
 
 		/// <summary>
 		/// Checks if in the current frame (moment of the video) the video has failed the flash criteria
 		/// </summary>
-		/// <param name="framePos"> current frame index </param>
-		/// <param name="fps">video frame rate</param>
 		/// <param name="data">data to persist</param>
-		virtual void EvaluateFrameMoment(int framePos, int fps,FrameData& data) = 0;
+		void EvaluateFrameMoment(FrameData& data);
 
 		/// <summary>
-		/// If AnalysisByTime is enabled, add the first frame to the FrameTimeStamps structs
+		/// If the new frame exceeds the frame rate, it is necessary to remove 1 or more elements from the counters.
 		/// </summary>
-		/// <param name="data">data to persist</param>
-		virtual void SetFirstFrame(FrameData& data) {}
+		/// <param name="framePos"> current frame index </param>
+		void UpdateCounters(const int& framePos);
 	protected:
-
-		TransitionTracker() {};
 
 		struct Counter
 		{
@@ -72,8 +70,13 @@ namespace iris
 			// return new current
 			int updateCurrent(const bool& newTransition)
 			{
-
-				
+				//Real-time only. If a big frame drop occurs
+				if (count.empty())
+				{
+					count.emplace_back(newTransition);
+					current = newTransition;
+					return newTransition;
+				}
 				//update the new transition count
 				if (newTransition)
 				{
@@ -93,6 +96,13 @@ namespace iris
 			{
 				passed = count.front();
 				count.erase(count.begin());
+
+				//Real-time only. If a big frame drop occurs
+				if (count.empty())
+				{
+					passed = 0;
+					current = 0;
+				}
 			}
 		};
 
@@ -117,6 +127,16 @@ namespace iris
 
 		TransitionTrackerParams* m_params = nullptr;
 
+		IFrameManager* m_frameManager = nullptr;
+
+		const int FAIL_TIME_WINDOW = 1; //window to calculate flash frequency (1s)
+		int m_failManagerIndx;
+
+		const int EXTENDED_FAIL_SECONDS = 4; //time at which extended failure can occur (4s)
+		int m_extendedSecManagerIndx;
+
+		const int EXTENDED_FAIL_WINDOW = 5; //max time window for extended failure (5s)
+		int m_extendedWinManagerIndx;
 	};
 
 }

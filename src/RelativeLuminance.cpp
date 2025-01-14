@@ -10,13 +10,14 @@ Abstract class for Flash detection
 #include <opencv2/core.hpp>
 #include "ConfigurationParams.h"
 #include "IrisFrame.h"
+#include "IFrameManager.h"
 
 namespace iris
 {
     cv::Scalar RelativeLuminance::rgbValues(0.0722f, 0.7152f, 0.2126f);
 
-    RelativeLuminance::RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params)
-        : Flash(fps, frameSize, params)
+    RelativeLuminance::RelativeLuminance(short fps, const cv::Size& frameSize, FlashParams* params, IFrameManager* frameManager)
+        : Flash(fps, frameSize, params, frameManager)
     {
     }
 

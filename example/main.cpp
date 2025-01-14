@@ -94,12 +94,6 @@ int main(int argc, char* argv[])
 		sourceVideo = getCmdOption(argv, argv + argc, "-v");
 	}
 
-	if (cmdOptionExists(argv, argv + argc, "-l"))
-	{
-		std::string lumType = getCmdOption(argv, argv + argc, "-l");
-		configuration.SetLuminanceType(lumType);
-	}
-
 	//load configuration
 	configuration.Init();
 
