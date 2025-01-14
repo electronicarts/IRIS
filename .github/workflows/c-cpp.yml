@@ -62,7 +62,7 @@ jobs:
         uses: lukka/run-vcpkg@v4
         with:
           setupOnly: true
-          vcpkgGitCommitId: 0affe8710a4a5b26328e909fe1ad7146df39d108
+          vcpkgGitCommitId: d320630b28aeb59b24424eb2a7ef3905314107a1
       
       # Restore vpkg cache
       - name: Restore vcpkg
