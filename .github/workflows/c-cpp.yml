@@ -48,6 +48,13 @@ jobs:
             mkdir -p ${{ github.workspace }}/vcpkg/bincache
           fi
         shell: bash
+
+      - name: Install packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm autoconf automake libtool pkg-config
+        
+      - if: runner.os == 'macOS'
+        run: brew install nasm
           
       - uses: lukka/get-cmake@latest
 
@@ -72,13 +79,6 @@ jobs:
         
       # Ensure that the developer command promt is present on Windows runners
       - uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install packages
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libxi-dev libxtst-dev bison gperf libgles2-mesa-dev libxrandr-dev libxcursor-dev libxdamage-dev libxinerama-dev nasm
-        
-      - if: runner.os == 'macOS'
-        run: brew install nasm
 
       - name: Restore from cache the dependencies and generate project files
         run: |
